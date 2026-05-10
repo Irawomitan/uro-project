@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Uro Language Game</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f0e0b;
+  --surface: #1a1813;
+  --surface2: #232018;
+  --border: #2e2a1e;
+  --gold: #c8a96e;
+  --gold2: #e8c87a;
+  --green: #5fba8a;
+  --red: #d4635a;
+  --blue: #6aa8d4;
+  --text: #f0e6d0;
+  --muted: #7a6a4f;
+  --muted2: #4a3d28;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ─── SCREEN SYSTEM ─── */
+.screen { display: none; width: 100%; max-width: 600px; padding: 0 16px; }
+.screen.active { display: flex; flex-direction: column; align-items: center; }
+
+/* ─── HOME ─── */
+#home {
+  min-height: 100vh;
+  justify-content: center;
+  gap: 0;
+  padding-top: 40px;
+  padding-bottom: 40px;
+}
+
+.logo-area { text-align: center; margin-bottom: 40px; }
+.logo-uro {
+  font-family: 'Playfair Display', serif;
+  font-size: 3rem;
+  color: var(--gold);
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.logo-sub {
+  font-size: 0.7rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.mode-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+.mode-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 22px 18px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+  position: relative;
+  overflow: hidden;
+}
+.mode-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.2s;
+  border-radius: 16px;
+}
+.mode-card:hover { border-color: var(--gold); transform: translateY(-2px); }
+.mode-card:hover::before { opacity: 1; }
+
+.mode-icon { font-size: 1.8rem; margin-bottom: 10px; display: block; }
+.mode-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.mode-desc { font-size: 0.72rem; color: var(--muted); line-height: 1.4; }
+.mode-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 10px;
+  background: var(--muted2);
+  color: var(--muted);
+}
+.mode-badge.hard { background: #3a1a10; color: #d4635a; }
+
+.cat-label {
+  font-size: 0.65rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 10px;
+  align-self: flex-start;
+}
+
+.cat-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  width: 100%;
+  margin-bottom: 28px;
+}
+
+.cat-btn {
+  padding: 5px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: all 0.18s;
+  font-family: 'DM Sans', sans-serif;
+}
+.cat-btn.selected {
+  background: var(--surface2);
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.stats-row {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+  margin-bottom: 8px;
+}
+.stat-box {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  text-align: center;
+}
+.stat-val {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  color: var(--gold);
+}
+.stat-lbl { font-size: 0.62rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 2px; }
+
+/* ─── GAME SCREEN ─── */
+#game { padding-top: 20px; padding-bottom: 40px; gap: 0; min-height: 100vh; justify-content: flex-start; }
+
+.game-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.back-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: all 0.2s;
+}
+.back-btn:hover { color: var(--text); border-color: var(--muted); }
+
+.game-meta { font-size: 0.68rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
+
+.score-display {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--gold);
+}
+
+/* Progress bar */
+.prog-bar { width: 100%; height: 3px; background: var(--surface2); border-radius: 2px; margin-bottom: 20px; overflow: hidden; }
+.prog-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold2)); border-radius: 2px; transition: width 0.4s; }
+
+/* Streak */
+.streak-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 20px;
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+.streak-dots { display: flex; gap: 4px; }
+.streak-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--border);
+  transition: background 0.2s;
+}
+.streak-dot.on { background: var(--gold); }
+
+/* Question card */
+.q-card {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 32px 28px;
+  margin-bottom: 20px;
+  text-align: center;
+  position: relative;
+}
+
+.q-direction {
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+
+.q-word {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.6rem;
+  color: var(--text);
+  line-height: 1.15;
+  margin-bottom: 8px;
+}
+
+.q-ipa {
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.q-pos {
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted2);
+  border: 1px solid var(--muted2);
+  padding: 2px 8px;
+  border-radius: 12px;
+  display: inline-block;
+}
+
+.q-cat {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted2);
+}
+
+/* Options grid */
+.options-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.opt-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px 12px;
+  color: var(--text);
+  font-size: 0.88rem;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: all 0.18s;
+  text-align: center;
+  line-height: 1.3;
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.opt-btn:hover:not(:disabled) { border-color: var(--gold); color: var(--gold); background: var(--surface2); }
+.opt-btn.correct { border-color: var(--green); background: #0f2a1c; color: var(--green); }
+.opt-btn.wrong { border-color: var(--red); background: #2a0f0c; color: var(--red); }
+.opt-btn.reveal { border-color: var(--green); background: #0f2a1c; color: var(--green); }
+.opt-btn:disabled { cursor: default; }
+
+/* Feedback */
+.feedback {
+  width: 100%;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 0.82rem;
+  margin-bottom: 14px;
+  display: none;
+  align-items: center;
+  gap: 10px;
+}
+.feedback.show { display: flex; }
+.feedback.correct { background: #0f2a1c; border: 1px solid #1a4a2c; color: var(--green); }
+.feedback.wrong { background: #2a0f0c; border: 1px solid #4a1a14; color: #e07870; }
+.feedback-icon { font-size: 1.2rem; flex-shrink: 0; }
+.feedback-text { line-height: 1.4; }
+
+/* Next btn */
+.next-btn {
+  width: 100%;
+  padding: 15px;
+  background: linear-gradient(135deg, var(--gold), #a8893e);
+  border: none;
+  border-radius: 14px;
+  color: #1a1208;
+  font-size: 0.92rem;
+  font-weight: 700;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: none;
+}
+.next-btn.show { display: block; }
+.next-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(200,169,110,0.25); }
+
+/* TYPE MODE input */
+.type-area {
+  width: 100%;
+  margin-bottom: 14px;
+  display: none;
+}
+.type-area.show { display: block; }
+.type-input {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 18px;
+  color: var(--text);
+  font-size: 1rem;
+  font-family: 'Playfair Display', serif;
+  outline: none;
+  transition: border-color 0.2s;
+  margin-bottom: 8px;
+}
+.type-input:focus { border-color: var(--gold); }
+.type-input.correct { border-color: var(--green); background: #0f2a1c; }
+.type-input.wrong { border-color: var(--red); }
+.type-submit {
+  width: 100%;
+  padding: 13px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 0.88rem;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.type-submit:hover { border-color: var(--gold); color: var(--gold); }
+
+/* MEMORY MATCH */
+.match-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 16px;
+}
+.match-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.18s;
+  font-size: 0.88rem;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.3;
+}
+.match-card:hover { border-color: var(--gold); }
+.match-card.selected { border-color: var(--blue); background: #0f1e2a; color: var(--blue); }
+.match-card.matched { border-color: var(--green); background: #0f2a1c; color: var(--green); pointer-events: none; opacity: 0.7; }
+.match-card.wrong-flash { border-color: var(--red); background: #2a0f0c; }
+.match-card.uro-card { font-family: 'Playfair Display', serif; font-size: 1rem; }
+
+/* RESULTS */
+#results { padding: 40px 16px; min-height: 100vh; justify-content: center; }
+
+.result-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  color: var(--gold);
+  text-align: center;
+  margin-bottom: 6px;
+}
+.result-sub { font-size: 0.78rem; color: var(--muted); text-align: center; margin-bottom: 32px; letter-spacing: 0.08em; }
+
+.result-score-big {
+  font-family: 'Playfair Display', serif;
+  font-size: 4.5rem;
+  color: var(--gold);
+  text-align: center;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.result-score-label { font-size: 0.7rem; color: var(--muted); text-align: center; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 30px; }
+
+.result-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 28px;
+}
+.result-stat {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 8px;
+  text-align: center;
+}
+.result-stat-val { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--text); }
+.result-stat-lbl { font-size: 0.6rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 3px; }
+
+.result-review {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 24px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+.review-title { font-size: 0.65rem; color: var(--muted); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 12px; }
+.review-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.8rem;
+}
+.review-item:last-child { border-bottom: none; }
+.review-uro { font-family: 'Playfair Display', serif; color: var(--gold); }
+.review-eng { color: var(--muted); }
+.review-tick { font-size: 0.9rem; }
+
+.play-again-btn {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, var(--gold), #a8893e);
+  border: none;
+  border-radius: 14px;
+  color: #1a1208;
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  margin-bottom: 10px;
+  transition: all 0.2s;
+}
+.play-again-btn:hover { transform: translateY(-1px); }
+
+.home-btn {
+  width: 100%;
+  padding: 13px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  color: var(--muted);
+  font-size: 0.88rem;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.home-btn:hover { color: var(--text); }
+
+/* Timer bar */
+.timer-bar { width: 100%; height: 4px; background: var(--surface2); border-radius: 2px; margin-bottom: 16px; overflow: hidden; }
+.timer-fill { height: 100%; background: var(--gold); border-radius: 2px; transition: width 0.1s linear; }
+.timer-fill.urgent { background: var(--red); }
+
+/* Difficulty pills */
+.diff-row {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 20px;
+}
+.diff-btn {
+  flex: 1;
+  padding: 8px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: all 0.18s;
+  letter-spacing: 0.05em;
+}
+.diff-btn.selected { border-color: var(--gold); color: var(--gold); background: var(--surface2); }
+
+</style>
+</head>
+<body>
+
+<!-- ══════════════ HOME ══════════════ -->
+<div id="home" class="screen active">
+  <div class="logo-area">
+    <div class="logo-uro">Uro</div>
+    <div class="logo-sub">Language Learning Game</div>
+  </div>
+
+  <div class="mode-grid">
+    <div class="mode-card" onclick="startGame('mcq-uro')">
+      <span class="mode-icon">🔤</span>
+      <div class="mode-name">Uro → English</div>
+      <div class="mode-desc">See an Uro word, pick its English meaning</div>
+    </div>
+    <div class="mode-card" onclick="startGame('mcq-eng')">
+      <span class="mode-icon">🌍</span>
+      <div class="mode-name">English → Uro</div>
+      <div class="mode-desc">See English, pick the correct Uro word</div>
+    </div>
+    <div class="mode-card" onclick="startGame('type')">
+      <span class="mode-icon">✍️</span>
+      <div class="mode-name">Type It</div>
+      <div class="mode-desc">See English, type the Uro word from memory</div>
+      <div class="mode-badge hard">Hard</div>
+    </div>
+    <div class="mode-card" onclick="startGame('match')">
+      <span class="mode-icon">🔗</span>
+      <div class="mode-name">Match Pairs</div>
+      <div class="mode-desc">Connect 6 Uro words to their English meanings</div>
+    </div>
+  </div>
+
+  <div class="cat-label">Filter by category</div>
+  <div class="cat-grid" id="cat-grid"></div>
+
+  <div class="cat-label">Difficulty</div>
+  <div class="diff-row">
+    <button class="diff-btn selected" data-diff="easy" onclick="selectDiff(this)">Easy · 4 options</button>
+    <button class="diff-btn" data-diff="medium" onclick="selectDiff(this)">Medium · timed</button>
+    <button class="diff-btn" data-diff="hard" onclick="selectDiff(this)">Hard · timed + type</button>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-box">
+      <div class="stat-val" id="stat-played">0</div>
+      <div class="stat-lbl">Games</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-val" id="stat-best">—</div>
+      <div class="stat-lbl">Best Score</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-val" id="stat-words">0</div>
+      <div class="stat-lbl">Words Seen</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ GAME ══════════════ -->
+<div id="game" class="screen">
+  <div class="game-header">
+    <button class="back-btn" onclick="goHome()">← Home</button>
+    <div class="game-meta" id="game-meta">Question 1/10</div>
+    <div class="score-display">⭐ <span id="score-display">0</span></div>
+  </div>
+
+  <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
+  <div class="timer-bar" id="timer-bar" style="display:none"><div class="timer-fill" id="timer-fill"></div></div>
+
+  <div class="streak-bar">
+    <span>Streak</span>
+    <div class="streak-dots" id="streak-dots"></div>
+    <span id="streak-count">0</span>
+  </div>
+
+  <div class="q-card" id="q-card">
+    <div class="q-cat" id="q-cat"></div>
+    <div class="q-direction" id="q-direction">What does this mean?</div>
+    <div class="q-word" id="q-word">Ópú</div>
+    <div class="q-ipa" id="q-ipa">[ópú]</div>
+    <div class="q-pos" id="q-pos">noun</div>
+  </div>
+
+  <div class="options-grid" id="options-grid"></div>
+
+  <div class="type-area" id="type-area">
+    <input type="text" class="type-input" id="type-input" placeholder="Type the Uro word…" autocomplete="off" autocorrect="off" spellcheck="false">
+    <button class="type-submit" onclick="submitType()">Check Answer</button>
+  </div>
+
+  <div class="feedback" id="feedback">
+    <span class="feedback-icon" id="fb-icon"></span>
+    <span class="feedback-text" id="fb-text"></span>
+  </div>
+
+  <button class="next-btn" id="next-btn" onclick="nextQuestion()">Next →</button>
+</div>
+
+<!-- ══════════════ MATCH GAME ══════════════ -->
+<div id="match-screen" class="screen">
+  <div class="game-header">
+    <button class="back-btn" onclick="goHome()">← Home</button>
+    <div class="game-meta">Match the Pairs</div>
+    <div class="score-display">⭐ <span id="match-score">0</span></div>
+  </div>
+  <div class="prog-bar"><div class="prog-fill" id="match-prog"></div></div>
+  <p style="font-size:0.72rem;color:var(--muted);margin-bottom:16px;text-align:center">Tap a word, then its pair</p>
+  <div class="match-grid" id="match-grid"></div>
+  <div class="feedback" id="match-feedback">
+    <span class="feedback-icon" id="mfb-icon"></span>
+    <span class="feedback-text" id="mfb-text"></span>
+  </div>
+</div>
+
+<!-- ══════════════ RESULTS ══════════════ -->
+<div id="results" class="screen">
+  <div class="result-title" id="result-title">Well done!</div>
+  <div class="result-sub" id="result-sub">You completed the round</div>
+  <div class="result-score-big" id="result-score">85</div>
+  <div class="result-score-label">Points</div>
+  <div class="result-grid">
+    <div class="result-stat"><div class="result-stat-val" id="res-correct">0</div><div class="result-stat-lbl">Correct</div></div>
+    <div class="result-stat"><div class="result-stat-val" id="res-wrong">0</div><div class="result-stat-lbl">Wrong</div></div>
+    <div class="result-stat"><div class="result-stat-val" id="res-streak">0</div><div class="result-stat-lbl">Best Streak</div></div>
+  </div>
+  <div class="result-review">
+    <div class="review-title">Words this round</div>
+    <div id="review-list"></div>
+  </div>
+  <button class="play-again-btn" onclick="playAgain()">Play Again</button>
+  <button class="home-btn" onclick="goHome()">← Back to Home</button>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+//  DATA
+// ═══════════════════════════════════════════
+const RAW = JSON.parse(`[{"uro": "Àbusìyì", "ipa": "[àbūsìjì]", "english": "Half", "pos": "n", "category": "Other"}, {"uro": "Àdá", "ipa": "[àdá]", "english": "Cutlass", "pos": "n", "category": "Other"}, {"uro": "Ádá", "ipa": "[ádá]", "english": "Only", "pos": "adv", "category": "Other"}, {"uro": "Àdá", "ipa": "[àdá]", "english": "Matchet", "pos": "n", "category": "Other"}, {"uro": "Adàhò", "ipa": "[ādàhò]", "english": "Foot", "pos": "n", "category": "Body Parts"}, {"uro": "Àdán", "ipa": "[àdã́]", "english": "Bat", "pos": "n", "category": "Animals"}, {"uro": "Ádávọ́", "ipa": "[ádávɔ́]", "english": "Palm (of hand)", "pos": "n", "category": "Body Parts"}, {"uro": "Ádugírí", "ipa": "[ádūgírí]", "english": "Conquerer", "pos": "n", "category": "Other"}, {"uro": "Àfésédídọ", "ipa": "[àfésédídɔ̄]", "english": "Fiancé (betrothed boyfriend)", "pos": "n", "category": "Family"}, {"uro": "Àfésédídọ", "ipa": "[àfésédídɔ̄]", "english": "Fiancée (betrothed girlfriend)", "pos": "n", "category": "Family"}, {"uro": "Àgà", "ipa": "[àgà]", "english": "Light", "pos": "v", "category": "Other"}, {"uro": "Àgbà", "ipa": "[àɡbà]", "english": "Mouth", "pos": "n", "category": "Body Parts"}, {"uro": "Ágbàhò", "ipa": "[áɡbàhò]", "english": "Shin", "pos": "n", "category": "Body Parts"}, {"uro": "Àgbèdè", "ipa": "[àɡbèdè]", "english": "Waist", "pos": "n", "category": "Body Parts"}, {"uro": "Àgbò", "ipa": "[àgbò]", "english": "Ram", "pos": "n", "category": "Animals"}, {"uro": "Agbójù", "ipa": "[āɡbódʒù]", "english": "Forehead", "pos": "n", "category": "Body Parts"}, {"uro": "Àgburùkù ígíriùji", "ipa": "[àg͡būrùkù ígírīùd͡ʒī]", "english": "Boat (canoe)", "pos": "n", "category": "Other"}, {"uro": "Agburukù íjú ìji", "ipa": "[āg͡būrūkù ídʒú ìdʒī]", "english": "Canoe", "pos": "n", "category": "Other"}, {"uro": "Àgẹ̀ chúwan", "ipa": "[àgɛ̀ t͡ʃúwã̄]", "english": "Barren woman", "pos": "n", "category": "Family"}, {"uro": "Agẹ̀ji", "ipa": "[āgɛ̀d͡ʒī]", "english": "Health and disease", "pos": "n", "category": "Other"}, {"uro": "Agẹmọn", "ipa": "[āgɛ̄mɔ̃̄]", "english": "Chameleon", "pos": "n", "category": "Other"}, {"uro": "Àgẹ̀ndù", "ipa": "[àgɛ̃̀dù]", "english": "Dwarf", "pos": "n", "category": "Other"}, {"uro": "Àgẹ̀phu", "ipa": "[àgɛ̀ɸū]", "english": "Poor man", "pos": "adj", "category": "Family"}, {"uro": "Àgẹ̀phu", "ipa": "[àgɛ̀ɸū]", "english": "(be)poor", "pos": "n", "category": "Other"}, {"uro": "Àgẹ̀ri ẹ̀nga", "ipa": "[àgɛ̀rī ɛ̃̀gā]", "english": "(be) myopic, (be) shortsighted", "pos": "v", "category": "Other"}, {"uro": "Àgẹ̀shwu", "ipa": "[àgɛ̀ɸū]", "english": "Poorly", "pos": "n", "category": "Other"}, {"uro": "Agídí", "ipa": "[āgídí]", "english": "(be) stubborn", "pos": "v", "category": "Other"}, {"uro": "Àhìn", "ipa": "[àhĩ̀]", "english": "Breath", "pos": "n", "category": "Body Parts"}, {"uro": "Ahùchẹ̀", "ipa": "[āhùt͡ʃɛ̀]", "english": "Choke", "pos": "v", "category": "Other"}, {"uro": "Ájá", "ipa": "[ád͡ʒá]", "english": "Market", "pos": "n", "category": "Places"}, {"uro": "Àjẹ̀", "ipa": "[àd͡ʒɛ̀]", "english": "Witch (female)", "pos": "n", "category": "Other"}, {"uro": "Àjéwẹ́nṣín", "ipa": "[àdʒéwɛ̃́ʃĩ́]", "english": "Prophecy(n)", "pos": "n", "category": "Other"}, {"uro": "Àjì", "ipa": "[àdʒì]", "english": "Curse (n)", "pos": "n", "category": "Other"}, {"uro": "Àjitáró", "ipa": "[àd͡ʒītáró]", "english": "Day before yesterday", "pos": "n", "category": "Time"}, {"uro": "Ájòkúkú", "ipa": "[ádʒòkúkú]", "english": "Funeral (at occasion of death)", "pos": "n", "category": "Other"}, {"uro": "Ajùvève", "ipa": "[ād͡ʒùvèvē]", "english": "Come and Eat", "pos": "v", "category": "Other"}, {"uro": "Àka", "ipa": "[àkā]", "english": "Bird", "pos": "n", "category": "Animals"}, {"uro": "Àka", "ipa": "[àkā]", "english": "Dove", "pos": "n", "category": "Other"}, {"uro": "Àkikàragba/inkún", "ipa": "[àkīkàrāg͡bā]", "english": "Calabash", "pos": "n", "category": "Other"}, {"uro": "Àkọ́shwí", "ipa": "[àkɔ́ɸí]", "english": "Firstborn", "pos": "n", "category": "Other"}, {"uro": "Akpokporogírí", "ipa": "[āk͡pōk͡pōrōgírí]", "english": "Skull", "pos": "n", "category": "Other"}, {"uro": "Àkù", "ipa": "[àkù]", "english": "Door (way)", "pos": "n", "category": "Other"}, {"uro": "Àkuru", "ipa": "[àkūrū]", "english": "Snail", "pos": "n", "category": "Animals"}, {"uro": "Aláàgbá", "ipa": "[āláàg͡bá]", "english": "Lizard", "pos": "n", "category": "Animals"}, {"uro": "Alákàn", "ipa": "[ālákã̀]", "english": "Crab", "pos": "n", "category": "Animals"}, {"uro": "Aláǹtakùn", "ipa": "[āláǹtākũ̀]", "english": "Spider", "pos": "n", "category": "Animals"}, {"uro": "Alùbásà", "ipa": "[ālùbásà]", "english": "Onion", "pos": "n", "category": "Food & Farm"}, {"uro": "Alúǹkẹ́", "ipa": "[ālúŋ̀kɛ́]", "english": "Star", "pos": "n", "category": "Nature"}, {"uro": "Àmì mì", "ipa": "[àmì mì]", "english": "Lightning", "pos": "n", "category": "Nature"}, {"uro": "Àmọ̀ntẹ́kùn", "ipa": "[àmɔ̃̀tɛ́kũ̀̀]", "english": "Leopard", "pos": "n", "category": "Animals"}, {"uro": "Áńdá", "ipa": "[áńdá]", "english": "Sheep", "pos": "n", "category": "Animals"}, {"uro": "Anshin", "ipa": "[ã̄shĩ̄]", "english": "Donkey", "pos": "n", "category": "Animals"}, {"uro": "Àǹta shwe", "ipa": "[ã̀ǹtā ɸē]", "english": "Compound", "pos": "n", "category": "Places"}, {"uro": "Apá", "ipa": "[āpá]", "english": "Hide (of animal)", "pos": "n", "category": "Animals"}, {"uro": "Àrá", "ipa": "[àrá]", "english": "Dream (n)", "pos": "n", "category": "Other"}, {"uro": "Aràn", "ipa": "[ārã̀]", "english": "Scar", "pos": "n", "category": "Other"}, {"uro": "Aràn", "ipa": "[ārã̀]", "english": "Ringʷorm", "pos": "n", "category": "Other"}, {"uro": "Àran", "ipa": "[àrã̄]", "english": "Goat", "pos": "n", "category": "Animals"}, {"uro": "Àran", "ipa": "[àrã̄]", "english": "Meat", "pos": "n", "category": "Food & Farm"}, {"uro": "Arán ìgo", "ipa": "[ārã́ ìgō]", "english": "Intestinal worm", "pos": "n", "category": "Other"}, {"uro": "Àràn ìji", "ipa": "[àrã̀ ìdʒī]", "english": "Skin (of man)", "pos": "n", "category": "Body Parts"}, {"uro": "Aran ijí", "ipa": "[ārã̄ īd͡ʒí]", "english": "Muscle", "pos": "n", "category": "Other"}, {"uro": "Àran odòrun", "ipa": "[àrã̄ ōdòrũ̄]", "english": "Lip", "pos": "n", "category": "Other"}, {"uro": "Àrán ọ́wọ́", "ipa": "[àrã́ ɔ́wɔ́]", "english": "Porcupine", "pos": "n", "category": "Other"}, {"uro": "Aríṣá", "ipa": "[āríʃá]", "english": "Aspect", "pos": "n", "category": "Other"}, {"uro": "Árọ", "ipa": "[árɔ̄]", "english": "Cripple (n)", "pos": "n", "category": "Other"}, {"uro": "Àrun", "ipa": "[àrũ̄]", "english": "Taste and smell", "pos": "v", "category": "Other"}, {"uro": "Àrùn éphúe", "ipa": "[àrũ̀ éɸúē]", "english": "Domestic animals", "pos": "n", "category": "Animals"}, {"uro": "Àrùnwà", "ipa": "[àrũ̀wà]", "english": "Animal", "pos": "n", "category": "Animals"}, {"uro": "Asà", "ipa": "[āsà]", "english": "Shield (n)", "pos": "n", "category": "Other"}, {"uro": "Àsa", "ipa": "[àsā]", "english": "Egg", "pos": "n", "category": "Food & Farm"}, {"uro": "Àsa kpára kpàra", "ipa": "[àsā kpárā kpàrā]", "english": "Rice", "pos": "n", "category": "Food & Farm"}, {"uro": "Ashwẹ", "ipa": "[āɸɛ̄]", "english": "Right, (be) correct", "pos": "v", "category": "Other"}, {"uro": "Àsi", "ipa": "[àsī]", "english": "Fruit", "pos": "n", "category": "Other"}, {"uro": "Àsùji / Àsà + ùji", "ipa": "[àsà ùd͡ʒī]", "english": "Water Pot", "pos": "n", "category": "Other"}, {"uro": "Àtà", "ipa": "[àtà]", "english": "Chair", "pos": "n", "category": "Other"}, {"uro": "Àtìntan", "ipa": "[àtĩ̀tã̄]", "english": "Between", "pos": "n", "category": "Other"}, {"uro": "Atita", "ipa": "[ātītā]", "english": "Middle", "pos": "n", "category": "Other"}, {"uro": "Àvò", "ipa": "[àvò]", "english": "Gown", "pos": "n", "category": "Other"}, {"uro": "Awán", "ipa": "[āwã́]", "english": "Price", "pos": "n", "category": "Food & Farm"}, {"uro": "Àwan", "ipa": "[àwã̄]", "english": "(be) old (not new)", "pos": "v", "category": "Other"}, {"uro": "Àwan", "ipa": "[àwã̄]", "english": "How many?", "pos": "n", "category": "Family"}, {"uro": "Áwán", "ipa": "[áwã́]", "english": "Armpit", "pos": "n", "category": "Body Parts"}, {"uro": "Awénṣí", "ipa": "[āwénʃí]", "english": "Family", "pos": "n", "category": "Family"}, {"uro": "Awó", "ipa": "[āwó]", "english": "Guinea fowl", "pos": "n", "category": "Other"}, {"uro": "Ayàn", "ipa": "[ājã̀]", "english": "Cockroach", "pos": "n", "category": "Animals"}, {"uro": "Àyẹ", "ipa": "[àjɛ̄]", "english": "Soup/sauce", "pos": "n", "category": "Food & Farm"}, {"uro": "Bàtà", "ipa": "[bàtà]", "english": "Shoe", "pos": "n", "category": "Other"}, {"uro": "Búlúù", "ipa": "[búlúù]", "english": "(be) blue", "pos": "v", "category": "Other"}, {"uro": "Cha", "ipa": "[tʃā]", "english": "Sell", "pos": "v", "category": "Other"}, {"uro": "Chà", "ipa": "[t͡ʃà]", "english": "Lick", "pos": "v", "category": "Other"}, {"uro": "Chẹ́", "ipa": "[t͡ʃɛ́]", "english": "Hear", "pos": "v", "category": "Other"}, {"uro": "Chechí", "ipa": "[tʃētʃí]", "english": "Sit", "pos": "v", "category": "Other"}, {"uro": "Chí rẹwẹ́", "ipa": "[t͡ʃí rɛ̄wɛ́]", "english": "Avoid", "pos": "v", "category": "Other"}, {"uro": "Chọ̀", "ipa": "[t͡ʃɔ̀]", "english": "Searching (sth)", "pos": "n", "category": "Other"}, {"uro": "Dà", "ipa": "[dà]", "english": "Buy", "pos": "v", "category": "Other"}, {"uro": "Dàgbà", "ipa": "[dàɡ͡bà]", "english": "Grow up", "pos": "v", "category": "Other"}, {"uro": "Dáju", "ipa": "[dád͡ʒū]", "english": "Chew", "pos": "v", "category": "Other"}, {"uro": "Dan", "ipa": "[dã̄]", "english": "(be) smooth", "pos": "v", "category": "Other"}, {"uro": "Dárá", "ipa": "[dárá]", "english": "Rub", "pos": "v", "category": "Other"}, {"uro": "Dẹ́gò", "ipa": "[dɛ́gò]", "english": "Taste", "pos": "v", "category": "Other"}, {"uro": "Dí", "ipa": "[dí]", "english": "Throw", "pos": "v", "category": "Other"}, {"uro": "Dí", "ipa": "[dí]", "english": "Enough", "pos": "n", "category": "Other"}, {"uro": "Dì", "ipa": "[dì]", "english": "Coagulate, clot", "pos": "v", "category": "Other"}, {"uro": "Díi", "ipa": "[díī]", "english": "Steal", "pos": "n", "category": "Other"}, {"uro": "Díwẹ́ṣí", "ipa": "[díwɛ᷈́ʃí]", "english": "Drop (tr)", "pos": "v", "category": "Other"}, {"uro": "Dọ̀", "ipa": "[dɔ̀]", "english": "Burn (n)", "pos": "n", "category": "Other"}, {"uro": "Dọ̀", "ipa": "[dɔ̀]", "english": "Burn (intr), blaze", "pos": "v", "category": "Other"}, {"uro": "Dọ", "ipa": "[dɔ̄]", "english": "Accompany", "pos": "v", "category": "Other"}, {"uro": "Dọ", "ipa": "[dɔ̄]", "english": "Choose", "pos": "n", "category": "Other"}, {"uro": "Dọ́gba", "ipa": "[dɔ́g͡bā]", "english": "(be) equal", "pos": "v", "category": "Other"}, {"uro": "Dọhìn", "ipa": "[dɔ̄hĩ̀]", "english": "Blow nose", "pos": "v", "category": "Body Parts"}, {"uro": "Dòndù", "ipa": "[dõ̀dù]", "english": "Carry on head", "pos": "v", "category": "Body Parts"}, {"uro": "Dòó", "ipa": "[dòó]", "english": "Follow", "pos": "v", "category": "Other"}, {"uro": "Dọ́wẹ̀", "ipa": "[dɔ́wɛ᷈̀]", "english": "Wait", "pos": "n", "category": "Other"}, {"uro": "Dọ̀wẹn", "ipa": "[dɔ̀wɛ̃̄]", "english": "Cease, stop", "pos": "v", "category": "Other"}, {"uro": "Dò̩wẹn re mi", "ipa": "[dòwɛ̃̄ rē mī]", "english": "Wait for Me", "pos": "n", "category": "Other"}, {"uro": "Dugírí", "ipa": "[dūgírí]", "english": "Conquer, defeat", "pos": "v", "category": "Other"}, {"uro": "Éshwi àran", "ipa": "[éɸī àrã̄]", "english": "She-goat, nanny goat", "pos": "n", "category": "Animals"}, {"uro": "Éshwi ẹ̀lẹdẹ̀", "ipa": "[éɸī ɛ̀lɛ̄dɛ̀]", "english": "Sow (female pig)", "pos": "n", "category": "Animals"}, {"uro": "Éshwi màálù", "ipa": "[éɸī màálù]", "english": "Cow (female)", "pos": "n", "category": "Animals"}, {"uro": "Edè", "ipa": "[ēdè]", "english": "(be) tired", "pos": "v", "category": "Other"}, {"uro": "Edi", "ipa": "[ēdī]", "english": "Thief", "pos": "n", "category": "Other"}, {"uro": "Edido̩", "ipa": "[ēdīdō]", "english": "Road", "pos": "n", "category": "Places"}, {"uro": "Édídọ", "ipa": "[édídɔ̄]", "english": "Path, road", "pos": "n", "category": "Places"}, {"uro": "Èégé", "ipa": "[èégé]", "english": "There", "pos": "n", "category": "Other"}, {"uro": "Egwapan", "ipa": "[ēgʷāpã̄]", "english": "Stomach ache, upset stomach", "pos": "n", "category": "Body Parts"}, {"uro": "Ehìn", "ipa": "[ēhĩ̀]", "english": "Nasal mucus, snot", "pos": "n", "category": "Other"}, {"uro": "Èjímèɾè", "ipa": "[èd͡ʒímèɾè]", "english": "Baboon", "pos": "n", "category": "Animals"}, {"uro": "Èjòlá", "ipa": "[èd͡ʒòlá]", "english": "Python", "pos": "n", "category": "Animals"}, {"uro": "Eȷẹ̀n", "ipa": "[ēȷɛ̃̀]", "english": "Tooth", "pos": "n", "category": "Body Parts"}, {"uro": "Ekìka", "ipa": "[ēkìkā]", "english": "Army ant, soldier ant", "pos": "n", "category": "Other"}, {"uro": "Eléshwe", "ipa": "[ēléɸē]", "english": "Neighbour", "pos": "n", "category": "Other"}, {"uro": "Eléshwi", "ipa": "[ēléɸī]", "english": "Woman", "pos": "n", "category": "Family"}, {"uro": "Eleshwi", "ipa": "[ēlēɸī]", "english": "Female", "pos": "n", "category": "Other"}, {"uro": "Enshì", "ipa": "[ēnshì]", "english": "Ground", "pos": "n", "category": "Other"}, {"uro": "Éphé-kpókpo", "ipa": "[éɸé-kpókpō]", "english": "Termite hill", "pos": "n", "category": "Animals"}, {"uro": "Ephe-uhọ̀", "ipa": "[ēɸē-ūhɔ̀]", "english": "Beehive", "pos": "n", "category": "Other"}, {"uro": "Erí", "ipa": "[ērí]", "english": "Today", "pos": "n", "category": "Time"}, {"uro": "Èrìrò", "ipa": "[èrìrò]", "english": "Mad person", "pos": "n", "category": "Family"}, {"uro": "Éró", "ipa": "[éró]", "english": "Yes", "pos": "n", "category": "Other"}, {"uro": "Èròpò lòpò", "ipa": "[èròpò lòpò]", "english": "Medicine man, traditional healer", "pos": "n", "category": "Family"}, {"uro": "Eshwe", "ipa": "[ēɸē]", "english": "House", "pos": "n", "category": "Places"}, {"uro": "Ésì", "ipa": "[e᷈́sì]", "english": "Charcoal", "pos": "n", "category": "Other"}, {"uro": "Èṣìgbà", "ipa": "[èʃìgbà]", "english": "Moon", "pos": "n", "category": "Nature"}, {"uro": "Èṣìgbà", "ipa": "[èʃìgbà]", "english": "Month", "pos": "n", "category": "Time"}, {"uro": "Ésín sín", "ipa": "[ésĩ́ sĩ́]", "english": "(be) black", "pos": "v", "category": "Other"}, {"uro": "Éṣínṣín ẹsèyọ̀", "ipa": "[éʃĩ́ʃĩ́ ɛ̄sèjɔ̀]", "english": "Pepper (green)", "pos": "n", "category": "Other"}, {"uro": "Etingbọ", "ipa": "[ētĩ̄g͡bɔ̄]", "english": "Grasshopper", "pos": "n", "category": "Other"}, {"uro": "Evó", "ipa": "[ēvó]", "english": "Money", "pos": "n", "category": "Other"}, {"uro": "Evò", "ipa": "[ēvò]", "english": "We (incl.)", "pos": "n", "category": "Other"}, {"uro": "Evo égírí", "ipa": "[ēvō égírí]", "english": "Brideprice (for bride's family)", "pos": "n", "category": "Family"}, {"uro": "Évọ kwọ", "ipa": "[évɔ̄ kʷɔ̄]", "english": "Some men", "pos": "n", "category": "Other"}, {"uro": "Eyin", "ipa": "[ējĩ̄]", "english": "Name", "pos": "n", "category": "Other"}, {"uro": "Eyinin", "ipa": "[ējīnĩ̄]", "english": "Teeth", "pos": "n", "category": "Other"}, {"uro": "Eyìyọ̀", "ipa": "[ējìjɔ̀]", "english": "Feather", "pos": "n", "category": "Other"}, {"uro": "Ẹ̀dẹ̀", "ipa": "[ɛ̀dɛ̀]", "english": "Mud", "pos": "n", "category": "Other"}, {"uro": "Ẹ̀ẹ́gẹ́", "ipa": "[ɛ̀ɛ́ŋɛ́]", "english": "Here", "pos": "n", "category": "Other"}, {"uro": "Ẹfọ̀n", "ipa": "[ɛ̄fɔ̃̀]", "english": "Buffalo", "pos": "n", "category": "Animals"}, {"uro": "Ẹ̀gẹ̀", "ipa": "[ɛ̀gɛ̀]", "english": "Lungs", "pos": "n", "category": "Body Parts"}, {"uro": "Ẹ́hẹ", "ipa": "[ɛ́hɛ̄]", "english": "Chicken", "pos": "n", "category": "Animals"}, {"uro": "Ẹjẹ́", "ipa": "[ɛ̄d͡ʒɛ́]", "english": "Thorn", "pos": "n", "category": "Other"}, {"uro": "Ẹ̀jẹ̀", "ipa": "[ɛ̀d͡ʒɛ̀]", "english": "Blood", "pos": "n", "category": "Body Parts"}, {"uro": "Ẹ̀jì", "ipa": "[ɛ̀d͡ʒì]", "english": "Beans", "pos": "n", "category": "Food & Farm"}, {"uro": "Ẹ̀ká ọ́ngọ", "ipa": "[ɛ̀ká ɔ̃́gɔ̄]", "english": "Branch (of tree)", "pos": "n", "category": "Other"}, {"uro": "Ẹ̀kpà", "ipa": "[ɛ̀kpà]", "english": "Groundnut, peanut", "pos": "n", "category": "Food & Farm"}, {"uro": "Ẹ̀lẹdẹ̀", "ipa": "[ɛ̀lɛ̄dɛ̀]", "english": "Pig", "pos": "n", "category": "Animals"}, {"uro": "Ẹ́lẹ̀jọ̀", "ipa": "[ɛ̩́lɛ̀d͡ʒɔ̀]", "english": "Once", "pos": "adv", "category": "Other"}, {"uro": "Ẹlẹ́wọ̀n", "ipa": "[ɛ̄lɛ́wɔ̃̀]", "english": "Prisoner, captive", "pos": "n", "category": "Other"}, {"uro": "Ẹ̀mẹ̀", "ipa": "[ɛ̀mɛ̀]", "english": "Leaf", "pos": "n", "category": "Other"}, {"uro": "Ẹnà", "ipa": "[ɛ̄nà]", "english": "Turtle (water)", "pos": "n", "category": "Animals"}, {"uro": "Ẹ̀nẹ", "ipa": "[ɛ̀nɛ̄]", "english": "Person", "pos": "n", "category": "Family"}, {"uro": "Ẹ̀nẹn", "ipa": "[ɛ̀nɛ̃̄]", "english": "Human being, person", "pos": "n", "category": "Family"}, {"uro": "Ẹnénrà ẹnénrà", "ipa": "[ɛ̄nẽ́rà ɛ̄nẽ́rà]", "english": "Relative (by blood)", "pos": "n", "category": "Body Parts"}, {"uro": "Ẹ̀ngẹ̀", "ipa": "[ɛ̃̀gɛ̀]", "english": "Axe", "pos": "n", "category": "Other"}, {"uro": "Ẹ̀rẹ̀sẹ", "ipa": "[ɛ̀rɛ᷈̀sɛ̄]", "english": "Afternoon", "pos": "n", "category": "Time"}, {"uro": "Ẹṣi", "ipa": "[ɛ̄ʃī]", "english": "Horse", "pos": "n", "category": "Animals"}, {"uro": "Ẹ̀tẹ̀", "ipa": "[ɛ̀tɛ̀]", "english": "Leprosy", "pos": "n", "category": "Other"}, {"uro": "Ẹ̀tùtu òwú", "ipa": "[ɛ̀tùtū òwú]", "english": "Cotton", "pos": "n", "category": "Other"}, {"uro": "Ẹ̀yẹ̀", "ipa": "[ɛ̀jɛ̀]", "english": "Dance (n)", "pos": "n", "category": "Other"}, {"uro": "Ẹ̀yẹ̀", "ipa": "[ɛ̀jɛ̀]", "english": "Snake", "pos": "n", "category": "Animals"}, {"uro": "Ẹyẹ̀", "ipa": "[ɛ̄jɛ̀]", "english": "Heart", "pos": "n", "category": "Body Parts"}, {"uro": "Ẹyẹn ijù", "ipa": "[ɛ̄jɛ̃̄ īd͡ʒù]", "english": "Tears (n)", "pos": "n", "category": "Body Parts"}, {"uro": "Ẹyẹvó", "ipa": "[ɛ̄jɛ̄vó]", "english": "Cowrie shell", "pos": "n", "category": "Animals"}, {"uro": "Fẹ́", "ipa": "[fɛ́]", "english": "Marry", "pos": "v", "category": "Other"}, {"uro": "Foinkun", "ipa": "[fōĩ̄kũ̄]", "english": "Break (pot/calabash)", "pos": "v", "category": "Other"}, {"uro": "Fọn Àṣọ", "ipa": "[fɔ̃̄ àʃɔ̄]", "english": "Wring (cloths)", "pos": "n", "category": "Other"}, {"uro": "Gà", "ipa": "[gà]", "english": "Lighten", "pos": "v", "category": "Other"}, {"uro": "Ga", "ipa": "[gā]", "english": "Scrape (v)", "pos": "v", "category": "Other"}, {"uro": "Gà", "ipa": "[gà]", "english": "(be) clean", "pos": "v", "category": "Other"}, {"uro": "Gáa", "ipa": "[gáā]", "english": "Roast", "pos": "n", "category": "Other"}, {"uro": "Gángan", "ipa": "[gángān]", "english": "Talking drum", "pos": "n", "category": "Other"}, {"uro": "Gè", "ipa": "[gè]", "english": "(be) heavy", "pos": "v", "category": "Other"}, {"uro": "Gè", "ipa": "[gè]", "english": "Weight", "pos": "n", "category": "Other"}, {"uro": "Gẹ̀ji", "ipa": "[gɛ̀d͡ʒī]", "english": "(be) healthy, (be) well", "pos": "v", "category": "Other"}, {"uro": "Gẹ́jì", "ipa": "[gɛ́d͡ʒì]", "english": "(be) great, (be) powerful", "pos": "v", "category": "Other"}, {"uro": "Géndé", "ipa": "[géndé]", "english": "Young man", "pos": "adj", "category": "Family"}, {"uro": "Géndé ẹ̀nẹ", "ipa": "[gẽ́dé ɛ̀nɛ̄]", "english": "Giant", "pos": "n", "category": "Other"}, {"uro": "Gere parívà", "ipa": "[gērē pārívà]", "english": "They (human)", "pos": "n", "category": "Family"}, {"uro": "Gere parívò", "ipa": "[gērē pārívò]", "english": "You (pl.)", "pos": "n", "category": "Other"}, {"uro": "Gò", "ipa": "[gò]", "english": "See", "pos": "v", "category": "Other"}, {"uro": "Gò", "ipa": "[gò]", "english": "Look at, watch", "pos": "v", "category": "Other"}, {"uro": "Gò̩", "ipa": "[gò]", "english": "Refuse", "pos": "n", "category": "Other"}, {"uro": "Gọ́", "ipa": "[gɔ́]", "english": "(be) hard", "pos": "v", "category": "Other"}, {"uro": "Go/ògogo", "ipa": "[gō]", "english": "Dry", "pos": "n", "category": "Other"}, {"uro": "Gọ̀gọ́", "ipa": "[gɔ̄̀gɔ́]", "english": "Resemble", "pos": "v", "category": "Other"}, {"uro": "Gó̩hù", "ipa": "[góhù]", "english": "Gather (things)", "pos": "n", "category": "Other"}, {"uro": "Gòǹso", "ipa": "[gòǹsō]", "english": "After", "pos": "adv", "category": "Other"}, {"uro": "Gòǹsun", "ipa": "[gòǹsũ̄]", "english": "(be) last", "pos": "v", "category": "Other"}, {"uro": "Gọ̀ọ́wẹ́nṣín", "ipa": "[gɔ̀ɔ́wɛ̃́ʃĩ́]", "english": "Divorce (v)", "pos": "v", "category": "Other"}, {"uro": "Guké", "ipa": "[gūké]", "english": "Hump (of hunchback)", "pos": "n", "category": "Other"}, {"uro": "Gúmàji", "ipa": "[gúmàd͡ʒī]", "english": "Tie Rope", "pos": "v", "category": "Other"}, {"uro": "Gúu", "ipa": "[gúū]", "english": "Pound (in Mortar)", "pos": "v", "category": "Other"}, {"uro": "Guuu àkù", "ipa": "[gūūū àkù]", "english": "Open (door)", "pos": "v", "category": "Other"}, {"uro": "Gbà", "ipa": "[gbà]", "english": "Kick", "pos": "v", "category": "Other"}, {"uro": "Gbà si", "ipa": "[g͡bà sī]", "english": "Put on (clothes)", "pos": "v", "category": "Other"}, {"uro": "Gbà yán", "ipa": "[g͡bà jã́]", "english": "Give", "pos": "v", "category": "Other"}, {"uro": "Gbà-gaà", "ipa": "[g͡bà-gāà]", "english": "Show (some Thing)", "pos": "v", "category": "Other"}, {"uro": "Gbàá dan", "ipa": "[g͡bàá dã̄]", "english": "Smoothen", "pos": "v", "category": "Other"}, {"uro": "Gbàdúa", "ipa": "[g͡bàdúā]", "english": "Pray", "pos": "v", "category": "Other"}, {"uro": "Gbàgaà", "ipa": "[g͡bàgāà]", "english": "Indicate, point (as with the finger)", "pos": "v", "category": "Animals"}, {"uro": "Gbàkánà", "ipa": "[g͡bàkã́à]", "english": "Touch, feel (active)", "pos": "v", "category": "Other"}, {"uro": "Gbàǹkwọ", "ipa": "[g͡bàŋ̀kʷɔ̄]", "english": "Increase (intr)", "pos": "v", "category": "Other"}, {"uro": "Gbàtú", "ipa": "[g͡bàtú]", "english": "Decrease (intr)", "pos": "v", "category": "Other"}, {"uro": "Gbàyàyàn", "ipa": "[g͡bàjàjã̀]", "english": "Return (tr),give back", "pos": "v", "category": "Other"}, {"uro": "Gbe", "ipa": "[g͡bē]", "english": "Dwell", "pos": "n", "category": "Other"}, {"uro": "Gbẹ", "ipa": "[g͡bɛ̄]", "english": "Dig", "pos": "v", "category": "Other"}, {"uro": "Gbẹ", "ipa": "[g͡bɛ̄]", "english": "Carve (wood)", "pos": "n", "category": "Other"}, {"uro": "Gbegbówa", "ipa": "[ɡ͡bēɡ͡bówā]", "english": "(be) young", "pos": "v", "category": "Other"}, {"uro": "Gbẹ́hẹ", "ipa": "[gbɛ́hɛ̄]", "english": "Catch (object in air)", "pos": "v", "category": "Animals"}, {"uro": "Gbigírí pàńṣín", "ipa": "[gbīgírí pàńʃĩ́]", "english": "Bow (as in greeting)", "pos": "v", "category": "Other"}, {"uro": "Gbijí tì", "ipa": "[g͡bīdʒí tì]", "english": "Lean against (intr)", "pos": "v", "category": "Other"}, {"uro": "Gbijí yan", "ipa": "[ɡ͡bīd͡ʒí jã̄]", "english": "Bruise (n)", "pos": "n", "category": "Other"}, {"uro": "Gbin Ọngọ", "ipa": "[g͡bĩ̄ ɔ̃̄gɔ̄]", "english": "Break (a Stick)", "pos": "v", "category": "Other"}, {"uro": "Gbò", "ipa": "[ɡ͡bò]", "english": "Bark (as dog) (v)", "pos": "v", "category": "Animals"}, {"uro": "Gbọgbe igú", "ipa": "[g͡bɔ̄g͡bē īgú]", "english": "Village", "pos": "n", "category": "Places"}, {"uro": "Gbòrù", "ipa": "[g͡bòrù]", "english": "Enlarge", "pos": "v", "category": "Other"}, {"uro": "Gbòrù", "ipa": "[g͡bòrù]", "english": "(be) wide", "pos": "v", "category": "Other"}, {"uro": "Gbuuvo̩dúu", "ipa": "[g͡būūvōdúū]", "english": "Cover (in Hand)", "pos": "v", "category": "Body Parts"}, {"uro": "Gbuvo̩ kée", "ipa": "[g͡būvō kéē]", "english": "Touch (with Hand)", "pos": "v", "category": "Body Parts"}, {"uro": "Gwà", "ipa": "[gʷà]", "english": "Greet (v.)", "pos": "v", "category": "Other"}, {"uro": "Gwee", "ipa": "[gʷēē]", "english": "Watch (things)", "pos": "n", "category": "Other"}, {"uro": "Gwọ", "ipa": "[gʷɔ̄]", "english": "Drink", "pos": "v", "category": "Other"}, {"uro": "Gwọhùn", "ipa": "[gʷɔ̄hũ̀]", "english": "(be) drunk", "pos": "v", "category": "Other"}, {"uro": "Hà", "ipa": "[hà]", "english": "(be) awake, alert", "pos": "v", "category": "Other"}, {"uro": "Hà", "ipa": "[hà]", "english": "Wake up (intr)", "pos": "v", "category": "Other"}, {"uro": "Hẹ̀", "ipa": "[hɛ̀]", "english": "Blow (with mouth)", "pos": "v", "category": "Body Parts"}, {"uro": "Hìn", "ipa": "[hĩ̀]", "english": "Breathe", "pos": "v", "category": "Body Parts"}, {"uro": "Hìn hẹ́lẹ́", "ipa": "[hĩ̀ hɛ́lɛ́]", "english": "Pant", "pos": "v", "category": "Other"}, {"uro": "Horòó", "ipa": "[hōròó]", "english": "Untie", "pos": "v", "category": "Other"}, {"uro": "Hù", "ipa": "[hù]", "english": "Fly (v)", "pos": "v", "category": "Other"}, {"uro": "Hù", "ipa": "[hù]", "english": "Foam", "pos": "n", "category": "Other"}, {"uro": "Hu", "ipa": "[hū]", "english": "Raise, lift", "pos": "v", "category": "Other"}, {"uro": "Hù yigìdì", "ipa": "[hù jīgìdì]", "english": "Fly up", "pos": "v", "category": "Other"}, {"uro": "Hun", "ipa": "[hũ̄]", "english": "Carry (in arms)", "pos": "v", "category": "Other"}, {"uro": "Hunhò", "ipa": "[hũ̄hò]", "english": "Step (v)", "pos": "v", "category": "Other"}, {"uro": "Í kú kú", "ipa": "[í kú kú]", "english": "(be) dead", "pos": "v", "category": "Other"}, {"uro": "Ibà", "ipa": "[ībà]", "english": "Malaria (fever)", "pos": "n", "category": "Other"}, {"uro": "Ibà", "ipa": "[ībà]", "english": "Fever (not malaria)", "pos": "n", "category": "Other"}, {"uro": "Íbirihẹ", "ipa": "[íbīrīhɛ̄]", "english": "Snow", "pos": "n", "category": "Nature"}, {"uro": "Ìbọn", "ipa": "[ìbɔ̃̄]", "english": "Gun", "pos": "n", "category": "Other"}, {"uro": "Idà", "ipa": "[īdà]", "english": "Sword", "pos": "n", "category": "Other"}, {"uro": "Ìda", "ipa": "[ìdā]", "english": "Three", "pos": "n", "category": "Other"}, {"uro": "Idaàla", "ipa": "[īdāàlā]", "english": "Crossroads, intersection", "pos": "n", "category": "Places"}, {"uro": "Ìde ìjí kèsì", "ipa": "[ìdē ìdʒí kèsì]", "english": "Body states and", "pos": "n", "category": "Body Parts"}, {"uro": "Idú", "ipa": "[īdú]", "english": "Hat/cap", "pos": "n", "category": "Other"}, {"uro": "Ìdun", "ipa": "[ìdũ̄]", "english": "Bedbug", "pos": "n", "category": "Other"}, {"uro": "Ìfà", "ipa": "[ìfà]", "english": "Six", "pos": "n", "category": "Other"}, {"uro": "Ìgà", "ipa": "[i᷈̀gà]", "english": "Side (of something)", "pos": "n", "category": "Other"}, {"uro": "Ìgalà", "ipa": "[ìɡālà]", "english": "Antelope", "pos": "n", "category": "Animals"}, {"uro": "Ìgbàdo", "ipa": "[ìg͡bàdō]", "english": "Maize", "pos": "n", "category": "Food & Farm"}, {"uro": "Igbègbè ọ̀nsọ̀", "ipa": "[īg͡bèg͡bè ɔ̃̀sɔ̀]", "english": "Small(est) drum", "pos": "adj", "category": "Other"}, {"uro": "Ígbógbó ugọ", "ipa": "[íg͡bóg͡bó ūgɔ̄]", "english": "Oil Palm", "pos": "n", "category": "Other"}, {"uro": "Ìgè", "ipa": "[ìɡè]", "english": "Chest", "pos": "n", "category": "Body Parts"}, {"uro": "Ígé", "ipa": "[ígé]", "english": "That", "pos": "n", "category": "Other"}, {"uro": "Ìgẹ̀", "ipa": "[ìgɛ̀]", "english": "Under, below", "pos": "n", "category": "Other"}, {"uro": "Ige íta (igéta)", "ipa": "[īgē ítā (īgétā)]", "english": "Cave", "pos": "n", "category": "Places"}, {"uro": "Igere", "ipa": "[īgērē]", "english": "All", "pos": "n", "category": "Other"}, {"uro": "Ìgere ẹ̀nẹ", "ipa": "[ìgērē ɛ̀nɛ̄]", "english": "Everybody", "pos": "n", "category": "Body Parts"}, {"uro": "Ìgere ìhẹ̀", "ipa": "[ìgērē ìhɛ̀]", "english": "Everywhere", "pos": "n", "category": "Other"}, {"uro": "Ìgere ìhọ", "ipa": "[ìgērē ìhɔ̄]", "english": "Everything", "pos": "n", "category": "Other"}, {"uro": "Igerepá", "ipa": "[īgērēpá]", "english": "All together", "pos": "n", "category": "Other"}, {"uro": "Ìgìdì", "ipa": "[ìgìdì]", "english": "Up", "pos": "n", "category": "Other"}, {"uro": "Igírí", "ipa": "[īɡírí]", "english": "Head", "pos": "n", "category": "Body Parts"}, {"uro": "Igírí àla ̀", "ipa": "[īgírí àlā ̀]", "english": "Headache", "pos": "n", "category": "Body Parts"}, {"uro": "Igírígọ̀", "ipa": "[īɡíríɡɔ̀]", "english": "Knee", "pos": "n", "category": "Body Parts"}, {"uro": "Igírìyọ̀", "ipa": "[īgírìjɔ̀]", "english": "Maturity", "pos": "n", "category": "Other"}, {"uro": "Igò", "ipa": "[īgò]", "english": "Tumour", "pos": "n", "category": "Other"}, {"uro": "Ìgo", "ipa": "[ìgō]", "english": "Inside", "pos": "n", "category": "Other"}, {"uro": "Ìgo", "ipa": "[ìɡō]", "english": "Stomach (internal)", "pos": "n", "category": "Body Parts"}, {"uro": "Ìgọ", "ipa": "[ìgɔ̄]", "english": "Belly (external)", "pos": "n", "category": "Body Parts"}, {"uro": "Ígọ́ kwọ", "ipa": "[ígɔ́ kʷɔ̄]", "english": "That man", "pos": "n", "category": "Family"}, {"uro": "Igógo", "ipa": "[īgógō]", "english": "Horn", "pos": "n", "category": "Other"}, {"uro": "Ígọ́gọ́", "ipa": "[ígɔ́gɔ́]", "english": "Senile person", "pos": "n", "category": "Family"}, {"uro": "Ígọ́gọ́", "ipa": "[ígɔ́gɔ́]", "english": "(be) old (not young)", "pos": "v", "category": "Other"}, {"uro": "Ígọ́gọ́", "ipa": "[ígɔ́gɔ́]", "english": "Adult", "pos": "n", "category": "Other"}, {"uro": "Ígọ́gọ́", "ipa": "[ígɔ́gɔ́]", "english": "Old Person", "pos": "adj", "category": "Family"}, {"uro": "Ígọ́lúchẹ̀", "ipa": "[íɡɔ́lútʃɛ̀]", "english": "Throat", "pos": "n", "category": "Body Parts"}, {"uro": "Ìgòsu", "ipa": "[ìgòsū]", "english": "End (n)", "pos": "n", "category": "Other"}, {"uro": "Ígu", "ipa": "[ígū]", "english": "Year", "pos": "n", "category": "Time"}, {"uro": "Igú", "ipa": "[īgú]", "english": "Mortar", "pos": "n", "category": "Other"}, {"uro": "Ìgú", "ipa": "[ìgú]", "english": "Town", "pos": "n", "category": "Places"}, {"uro": "Igwé", "ipa": "[īgʷé]", "english": "World", "pos": "n", "category": "Other"}, {"uro": "Igwẹ́ úrá", "ipa": "[īgʷɛ́ úrá]", "english": "Olden times", "pos": "n", "category": "Time"}, {"uro": "Ìhan", "ipa": "[ìhã̄]", "english": "Vagina", "pos": "n", "category": "Body Parts"}, {"uro": "Ihàn", "ipa": "[īhã̀]", "english": "Friend", "pos": "n", "category": "Family"}, {"uro": "Ìhé", "ipa": "[ìhé]", "english": "Left (direction)", "pos": "n", "category": "Other"}, {"uro": "Ìhẹ̀", "ipa": "[ìhɛ̀]", "english": "Vision(supernatural)", "pos": "n", "category": "Other"}, {"uro": "Ihẹ̀", "ipa": "[īhɛ̀]", "english": "Air (breathed)", "pos": "n", "category": "Body Parts"}, {"uro": "Ihẹ̀", "ipa": "[īhɛ̀]", "english": "Wind", "pos": "n", "category": "Nature"}, {"uro": "Ìhẹ̀jù", "ipa": "[ìhɛ̀d͡ʒù]", "english": "Eagle", "pos": "n", "category": "Animals"}, {"uro": "Ìhẹ̀n", "ipa": "[ìhɛ̃̀]", "english": "Word", "pos": "n", "category": "Other"}, {"uro": "Ìhọ", "ipa": "[ìhɔ̄]", "english": "Thing", "pos": "n", "category": "Other"}, {"uro": "Íhó àsa", "ipa": "[íhó àsā]", "english": "Eggshell", "pos": "n", "category": "Food & Farm"}, {"uro": "Ìhọ̀ ìṣìgbà", "ipa": "[ìhɔ̀ ìʃìɡ͡bà]", "english": "Menstrual period", "pos": "n", "category": "Other"}, {"uro": "Iho ọgọ", "ipa": "[īhō ɔ̄gɔ̄]", "english": "Bark (of tree)", "pos": "v", "category": "Other"}, {"uro": "Ìhoho", "ipa": "[ìhōhō]", "english": "(be) white", "pos": "v", "category": "Other"}, {"uro": "Ìhọhọ̀ ẹ̀nẹ", "ipa": "[ìhɔ̄hɔ̀ ɛ̀nɛ̄]", "english": "White man", "pos": "adj", "category": "Family"}, {"uro": "Ìhọ́nẹtàẹ̀nẹ", "ipa": "[ìhɔ́nɛ̄tàɛ̀nɛ̄]", "english": "Stinger", "pos": "n", "category": "Other"}, {"uro": "Ìhọ̀nshẹ̀", "ipa": "[ìhɔ̃̀shɛ̀]", "english": "Mat", "pos": "n", "category": "Other"}, {"uro": "Ijagẹya", "ipa": "[īd͡ʒāgɛ̄jā]", "english": "(be) sick, (be) ill", "pos": "v", "category": "Other"}, {"uro": "Íjerẹdà", "ipa": "[íd͡ʒērɛ̄dà]", "english": "One hundred ninety", "pos": "n", "category": "Other"}, {"uro": "Íjerẹdà-rẹ-ìda", "ipa": "[íd͡ʒērɛ̄dà-rɛ̄-ìdā]", "english": "One hundred ninety-three", "pos": "n", "category": "Other"}, {"uro": "Íjerẹdà-rẹ-ìfà", "ipa": "[íd͡ʒērɛ̄dà-rɛ̄-ìfà]", "english": "One hundred ninety-six", "pos": "n", "category": "Other"}, {"uro": "Íjerẹdà-rẹ-íńdá", "ipa": "[íd͡ʒērɛ̄dà-rɛ̄-ĩ́dá]", "english": "One hundred ninety-nine", "pos": "n", "category": "Other"}, {"uro": "Íjerẹdà-rẹ-inẹ́", "ipa": "[íd͡ʒērɛ̄dà-rɛ̄-īnɛ́]", "english": "One hundred ninety-four", "pos": "n", "category": "Other"}, {"uro": "Íjerẹdà-rẹ-íńtọ́", "ipa": "[íd͡ʒērɛ̄dà-rɛ̄-ĩ́tɔ́]", "english": "One hundred ninety-five", "pos": "n", "category": "Other"}, {"uro": "Íjerẹdà-rẹ-íro", "ipa": "[íd͡ʒērɛ̄dà-rɛ̄-írō]", "english": "One hundred ninety-eight", "pos": "n", "category": "Other"}, {"uro": "Íjerẹdà-rẹ-íshwí", "ipa": "[íd͡ʒērɛ̄dà-rɛ̄-íɸí]", "english": "One hundred ninety-seven", "pos": "n", "category": "Other"}, {"uro": "Íjerẹdà-rẹ-ìyí", "ipa": "[íd͡ʒērɛ̄dà-rɛ̄-ìjí]", "english": "One hundred ninety-two", "pos": "n", "category": "Other"}, {"uro": "Íjerẹdà-rẹ-ọ̀lọ̀", "ipa": "[íd͡ʒērɛ̄dà-rɛ̄-ɔ̀lɔ̀]", "english": "One hundred ninety-one", "pos": "n", "category": "Other"}, {"uro": "Íjerẹfà", "ipa": "[íd͡ʒērɛ̄fà]", "english": "One hundred thirty", "pos": "n", "category": "Other"}, {"uro": "Íjerẹfà-rẹ-ìda", "ipa": "[íd͡ʒērɛ̄fà-rɛ̄-ìdā]", "english": "One hundred thirty-three", "pos": "n", "category": "Other"}, {"uro": "Íjerẹfà-rẹ-ìfà", "ipa": "[íd͡ʒērɛ̄fà-rɛ̄-ìfà]", "english": "One hundred thirty-six", "pos": "n", "category": "Other"}, {"uro": "Íjerẹfà-rẹ-íńdá", "ipa": "[íd͡ʒērɛ̄fà-rɛ̄-ĩ́dá]", "english": "One hundred thirty-nine", "pos": "n", "category": "Other"}, {"uro": "Íjerẹfà-rẹ-inẹ́", "ipa": "[íd͡ʒērɛ̄fà-rɛ̄-īnɛ́]", "english": "One hundred thirty-four", "pos": "n", "category": "Other"}, {"uro": "Íjerẹfà-rẹ-íńtọ́", "ipa": "[íd͡ʒērɛ̄fà-rɛ̄-ĩ́tɔ́]", "english": "One hundred thirty-five", "pos": "n", "category": "Other"}, {"uro": "Íjerẹfà-rẹ-íro", "ipa": "[íd͡ʒērɛ̄fà-rɛ̄-írō]", "english": "One hundred thirty-eight", "pos": "n", "category": "Other"}, {"uro": "Íjerẹfà-rẹ-íshwí", "ipa": "[íd͡ʒērɛ̄fà-rɛ̄-íɸí]", "english": "One hundred thirty-seven", "pos": "n", "category": "Other"}, {"uro": "Íjerẹfà-rẹ-ìyí", "ipa": "[íd͡ʒērɛ̄fà-rɛ̄-ìjí]", "english": "One hundred thirty-two", "pos": "n", "category": "Other"}, {"uro": "Íjerẹfà-rẹ-ọ̀lọ̀", "ipa": "[íd͡ʒērɛ̄fà-rɛ̄-ɔ̀lɔ̀]", "english": "One hundred thirty-one", "pos": "n", "category": "Other"}, {"uro": "Íjerẹ́ńtọ̀", "ipa": "[íd͡ʒērɛ̃́tɔ̀]", "english": "One hundred ten", "pos": "n", "category": "Other"}, {"uro": "Íjerẹ́ńtọ̀-rẹ-ìda", "ipa": "[íd͡ʒērɛ̃́tɔ̀-rɛ̄-ìdā]", "english": "One hundred thirteen", "pos": "n", "category": "Other"}, {"uro": "Íjerẹ́ńtọ̀-rẹ-ìfà", "ipa": "[íd͡ʒērɛ̃́tɔ̀-rɛ̄-ìfà]", "english": "One hundred sixteen", "pos": "n", "category": "Other"}, {"uro": "Íjerẹ́ńtọ̀-rẹ-íńdá", "ipa": "[íd͡ʒērɛ̃́tɔ̀-rɛ̄-ĩ́dá]", "english": "One hundred nineteen", "pos": "n", "category": "Other"}, {"uro": "Íjerẹ́ńtọ̀-rẹ-inẹ́", "ipa": "[íd͡ʒērɛ̃́tɔ̀-rɛ̄-īnɛ́]", "english": "One hundred fourteen", "pos": "n", "category": "Other"}, {"uro": "Íjerẹ́ńtọ̀-rẹ-íńtọ́", "ipa": "[íd͡ʒērɛ̃́tɔ̀-rɛ̄-ĩ́tɔ́]", "english": "One hundred fifteen", "pos": "n", "category": "Other"}, {"uro": "Íjerẹ́ńtọ̀-rẹ-íro", "ipa": "[íd͡ʒērɛ̃́tɔ̀-rɛ̄-írō]", "english": "One hundred eighteen", "pos": "n", "category": "Other"}, {"uro": "Íjerẹ́ńtọ̀-rẹ-íshwí", "ipa": "[íd͡ʒērɛ̃́tɔ̀-rɛ̄-íɸí]", "english": "One hundred seventeen", "pos": "n", "category": "Other"}, {"uro": "Íjerẹ́ńtọ̀-rẹ-ìyí", "ipa": "[íd͡ʒērɛ̃́tɔ̀-rɛ̄-ìjí]", "english": "One hundred twelve", "pos": "n", "category": "Other"}, {"uro": "Íjerẹ́ńtọ̀-rẹ-ọ̀lọ̀", "ipa": "[íd͡ʒērɛ̃́tɔ̀-rɛ̄-ɔ̀lɔ̀]", "english": "One hundred eleven", "pos": "n", "category": "Other"}, {"uro": "Íjerẹro", "ipa": "[íd͡ʒērɛ̄rō]", "english": "One hundred seventy", "pos": "n", "category": "Other"}, {"uro": "Íjerẹro-rẹ-ìda", "ipa": "[íd͡ʒērɛ̄rō-rɛ̄-ìdā]", "english": "One hundred seventy-three", "pos": "n", "category": "Other"}, {"uro": "Íjerẹro-rẹ-ìfà", "ipa": "[íd͡ʒērɛ̄rō-rɛ̄-ìfà]", "english": "One hundred seventy-six", "pos": "n", "category": "Other"}, {"uro": "Íjerẹro-rẹ-íńdá", "ipa": "[íd͡ʒērɛ̄rō-rɛ̄-ĩ́dá]", "english": "One hundred seventy-nine", "pos": "n", "category": "Other"}, {"uro": "Íjerẹro-rẹ-inẹ́", "ipa": "[íd͡ʒērɛ̄rō-rɛ̄-īnɛ́]", "english": "One hundred seventy-four", "pos": "n", "category": "Other"}, {"uro": "Íjerẹro-rẹ-íńtọ́", "ipa": "[íd͡ʒērɛ̄rō-rɛ̄-ĩ́tɔ́]", "english": "One hundred seventy-five", "pos": "n", "category": "Other"}, {"uro": "Íjerẹro-rẹ-íro", "ipa": "[íd͡ʒērɛ̄rō-rɛ̄-írō]", "english": "One hundred seventy-eight", "pos": "n", "category": "Other"}, {"uro": "Íjerẹro-rẹ-íshwí", "ipa": "[íd͡ʒērɛ̄rō-rɛ̄-íɸí]", "english": "One hundred seventy-seven", "pos": "n", "category": "Other"}, {"uro": "Íjerẹro-rẹ-ìyí", "ipa": "[íd͡ʒērɛ̄rō-rɛ̄-ìjí]", "english": "One hundred seventy-two", "pos": "n", "category": "Other"}, {"uro": "Íjerẹro-rẹ-ọ̀lọ̀", "ipa": "[íd͡ʒērɛ̄rō-rɛ̄-ɔ̀lɔ̀]", "english": "One hundred seventy-one", "pos": "n", "category": "Other"}, {"uro": "Íjerẹshwí", "ipa": "[íd͡ʒērɛ̄ɸí]", "english": "One hundred fifty", "pos": "n", "category": "Other"}, {"uro": "Íjerẹshwí-rẹ-ìda", "ipa": "[íd͡ʒērɛ̄ɸí-rɛ̄-ìdā]", "english": "One hundred fifty-three", "pos": "n", "category": "Other"}, {"uro": "Íjerẹshwí-rẹ-ìfà", "ipa": "[íd͡ʒērɛ̄ɸí-rɛ̄-ìfà]", "english": "One hundred fifty-six", "pos": "n", "category": "Other"}, {"uro": "Íjerẹshwí-rẹ-íńdá", "ipa": "[íd͡ʒērɛ̄ɸí-rɛ̄-ĩ́dá]", "english": "One hundred fifty-nine", "pos": "n", "category": "Other"}, {"uro": "Íjerẹshwí-rẹ-inẹ́", "ipa": "[íd͡ʒērɛ̄ɸí-rɛ̄-īnɛ́]", "english": "One hundred fifty-four", "pos": "n", "category": "Other"}, {"uro": "Íjerẹshwí-rẹ-íńtọ́", "ipa": "[íd͡ʒērɛ̄ɸí-rɛ̄-ĩ́tɔ́]", "english": "One hundred fifty-five", "pos": "n", "category": "Other"}, {"uro": "Íjerẹshwí-rẹ-íro", "ipa": "[íd͡ʒērɛ̄ɸí-rɛ̄-írō]", "english": "One hundred fifty-eight", "pos": "n", "category": "Other"}, {"uro": "Íjerẹshwí-rẹ-íshwí", "ipa": "[íd͡ʒērɛ̄ɸí-rɛ̄-íɸí]", "english": "One hundred fifty-seven", "pos": "n", "category": "Other"}, {"uro": "Íjerẹshwí-rẹ-ìyí", "ipa": "[íd͡ʒērɛ̄ɸí-rɛ̄-ìjí]", "english": "One hundred fifty-two", "pos": "n", "category": "Other"}, {"uro": "Íjerẹshwí-rẹ-ọ̀lọ̀", "ipa": "[íd͡ʒērɛ̄ɸí-rɛ̄-ɔ̀lɔ̀]", "english": "One hundred fifty-one", "pos": "n", "category": "Other"}, {"uro": "Ijí", "ipa": "[īdʒí]", "english": "Body", "pos": "n", "category": "Body Parts"}, {"uro": "Ìji", "ipa": "[ìd͡ʒī]", "english": "Self", "pos": "n", "category": "Other"}, {"uro": "Ìji àgẹ̀jọ", "ipa": "[ìd͡ʒī àgɛ̀d͡ʒɔ̄]", "english": "Handicapped people", "pos": "n", "category": "Body Parts"}, {"uro": "Ìjì àro ̀", "ipa": "[ìd͡ʒì àrō ̀]", "english": "Pain (n)", "pos": "n", "category": "Other"}, {"uro": "Ìjì àwọn ̀", "ipa": "[ìd͡ʒì àwɔ̃̄ ̀]", "english": "Scabies (the itch)", "pos": "n", "category": "Other"}, {"uro": "Ìji ayá", "ipa": "[ìd͡ʒī ājá]", "english": "Get well, recover", "pos": "n", "category": "Other"}, {"uro": "Ìjọ̀", "ipa": "[ìd͡ʒɔ̀]", "english": "Season", "pos": "n", "category": "Time"}, {"uro": "Ìjọ̀ ntù", "ipa": "[ìd͡ʒɔ̀ n̄tù]", "english": "Cold weather", "pos": "adj", "category": "Other"}, {"uro": "Ìjọ̀ ùji", "ipa": "[ìd͡ʒɔ̀ ùd͡ʒī]", "english": "Rainy season", "pos": "n", "category": "Time"}, {"uro": "Ìjọ̀ ùji", "ipa": "[ìd͡ʒɔ̀ ùd͡ʒī]", "english": "Raining Season", "pos": "n", "category": "Time"}, {"uro": "Ìjọ̀ ùnọ̀", "ipa": "[ìd͡ʒɔ̀ ùnɔ̀]", "english": "Dry season", "pos": "n", "category": "Time"}, {"uro": "Ijọyẹ", "ipa": "[īd͡ʒɔ̄jɛ̄]", "english": "When?", "pos": "n", "category": "Time"}, {"uro": "Ijù", "ipa": "[īdʒù]", "english": "Face", "pos": "n", "category": "Other"}, {"uro": "Íjú ìjù", "ipa": "[íd͡ʒú ìd͡ʒù]", "english": "Cloud", "pos": "n", "category": "Other"}, {"uro": "Ìkà", "ipa": "[ìkà]", "english": "Outside", "pos": "n", "category": "Other"}, {"uro": "Íká", "ipa": "[íká]", "english": "Wing", "pos": "n", "category": "Other"}, {"uro": "Ìkamẹ̀", "ipa": "[ìkāmɛ̀]", "english": "Shoulder", "pos": "n", "category": "Other"}, {"uro": "Ìkarahun", "ipa": "[ìkārāhũ̄]", "english": "Shell (of turtle)", "pos": "n", "category": "Animals"}, {"uro": "Iké", "ipa": "[īké]", "english": "Hunchback", "pos": "n", "category": "Other"}, {"uro": "Iké", "ipa": "[īké]", "english": "Hump (of cow)", "pos": "n", "category": "Animals"}, {"uro": "Ìkótó", "ipa": "[ìkótó]", "english": "Whole", "pos": "n", "category": "Other"}, {"uro": "Íkpi", "ipa": "[íkpī]", "english": "Bone", "pos": "n", "category": "Other"}, {"uro": "Ikpi ìngà", "ipa": "[īk͡pī ĩ̀gà]", "english": "Rib", "pos": "n", "category": "Other"}, {"uro": "Ikpi íphẹ́", "ipa": "[īk͡pī íɸɛ́]", "english": "Fish bone", "pos": "v", "category": "Animals"}, {"uro": "Ikpi òsu", "ipa": "[īk͡pī òsū]", "english": "Spine, backbone", "pos": "n", "category": "Other"}, {"uro": "Íkpókpo", "ipa": "[íkpókpō]", "english": "Termite", "pos": "n", "category": "Animals"}, {"uro": "Íkú", "ipa": "[íkú]", "english": "Death", "pos": "n", "category": "Other"}, {"uro": "Íkúkú", "ipa": "[íkúkú]", "english": "Ghost", "pos": "n", "category": "Other"}, {"uro": "Íkúkú", "ipa": "[íkúkú]", "english": "Corpse", "pos": "n", "category": "Other"}, {"uro": "Ilámí", "ipa": "[īlámí]", "english": "Buttocks", "pos": "n", "category": "Other"}, {"uro": "Ima", "ipa": "[ima]", "english": "Wall", "pos": "n", "category": "Other"}, {"uro": "Imẹ̀", "ipa": "[īmɛ̀]", "english": "Debt", "pos": "n", "category": "Other"}, {"uro": "Ìmẹ̀", "ipa": "[ìmɛ̀]", "english": "Play (n)", "pos": "n", "category": "Other"}, {"uro": "Ìmẹ", "ipa": "[ìmɛ̄]", "english": "Deity", "pos": "n", "category": "Other"}, {"uro": "Ìmẹ́ ují", "ipa": "[ìmɛ́ ūdʒí]", "english": "Deity of river", "pos": "n", "category": "Other"}, {"uro": "Ímí", "ipa": "[ímí]", "english": "Faeces", "pos": "n", "category": "Other"}, {"uro": "Ímímá ọ́kwọ", "ipa": "[ímímá ɔ́kʷɔ̄]", "english": "Other men", "pos": "n", "category": "Other"}, {"uro": "Ímín", "ipa": "[ímĩ́]", "english": "Excrement, faeces", "pos": "n", "category": "Other"}, {"uro": "Imò", "ipa": "[īmò]", "english": "Hunger", "pos": "n", "category": "Other"}, {"uro": "Imù", "ipa": "[īmù]", "english": "Palm Wine", "pos": "n", "category": "Other"}, {"uro": "Ìmúnvọ́", "ipa": "[ìmṹvɔ́]", "english": "Fist", "pos": "n", "category": "Other"}, {"uro": "Ìmúvọ́", "ipa": "[ìmúvɔ́]", "english": "Knuckle", "pos": "n", "category": "Other"}, {"uro": "Ínàn", "ipa": "[ínã̀]", "english": "Buttock", "pos": "n", "category": "Other"}, {"uro": "Íńdá", "ipa": "[ĩ́dá]", "english": "Nine", "pos": "n", "category": "Other"}, {"uro": "Ìndù", "ipa": "[ĩ̀dù]", "english": "Penis", "pos": "n", "category": "Other"}, {"uro": "Inẹ́", "ipa": "[īnɛ́]", "english": "Four", "pos": "n", "category": "Other"}, {"uro": "Inẹ́ gwọ́màji", "ipa": "[īnɛ́ gʷɔ́màd͡ʒī]", "english": "Add", "pos": "v", "category": "Other"}, {"uro": "Ìngà", "ipa": "[ĩ̀gà]", "english": "Beside", "pos": "n", "category": "Other"}, {"uro": "Ìngà", "ipa": "[ĩ̀ɡà]", "english": "Side (of body)", "pos": "n", "category": "Body Parts"}, {"uro": "Íngà", "ipa": "[ĩ́ɡà]", "english": "Fingernail", "pos": "n", "category": "Other"}, {"uro": "Íńgá", "ipa": "[ĩ́ńgá]", "english": "Basket", "pos": "n", "category": "Other"}, {"uro": "Ingaa", "ipa": "[ĩ̄gāā]", "english": "Nail (finger)", "pos": "n", "category": "Other"}, {"uro": "Íngàrùwà", "ipa": "[ĩ́ɡàrùwà]", "english": "Claw", "pos": "n", "category": "Other"}, {"uro": "Ingávọ́", "ipa": "[ĩ̄ɡávɔ́]", "english": "Finger", "pos": "n", "category": "Other"}, {"uro": "Ingẹ̀", "ipa": "[īŋgɛ̀]", "english": "Day", "pos": "n", "category": "Other"}, {"uro": "Íngọn gọ́vọ́", "ipa": "[ĩ́ɡɔ̃̄ ɡɔ́vɔ́]", "english": "Elbow", "pos": "n", "category": "Other"}, {"uro": "Ìngù", "ipa": "[ĩ̀gù]", "english": "Root", "pos": "n", "category": "Other"}, {"uro": "Íngu", "ipa": "[ĩ́gū]", "english": "Okra", "pos": "n", "category": "Other"}, {"uro": "Ingu ọ́ngọ́", "ipa": "[ĩ̄gū ɔ̃́gɔ́]", "english": "Root (of tree)", "pos": "n", "category": "Other"}, {"uro": "Ínkúleínkúle", "ipa": "[ĩ́kúlēĩ́kúlē]", "english": "Grandparent", "pos": "n", "category": "Other"}, {"uro": "Ìǹkwòn", "ipa": "[Ìǹkʷòn]", "english": "Rubbish Heap", "pos": "n", "category": "Other"}, {"uro": "Ìnọ̀", "ipa": "[ìnɔ̀]", "english": "Palm nut", "pos": "n", "category": "Other"}, {"uro": "Inphẹ", "ipa": "[ĩ̄ɸɛ̄]", "english": "Fish", "pos": "v", "category": "Animals"}, {"uro": "Insen", "ipa": "[ĩ̄sēn]", "english": "Spear (war)", "pos": "n", "category": "Other"}, {"uro": "Ìnsọ̀", "ipa": "[ĩ̀sɔ̀]", "english": "Orange", "pos": "n", "category": "Other"}, {"uro": "Íntẹ́n", "ipa": "[ĩ́tɛ̃́]", "english": "Saliva", "pos": "n", "category": "Other"}, {"uro": "Íńtọ́", "ipa": "[ĩ́tɔ́]", "english": "Five", "pos": "n", "category": "Other"}, {"uro": "Intọtúkuyẹ̀", "ipa": "[ĩ̄tɔ̄túkūjɛ̀]", "english": "Three Hundred", "pos": "n", "category": "Other"}, {"uro": "Ìntu", "ipa": "[ĩ̀tū]", "english": "Maggot (in rotten meat)", "pos": "n", "category": "Food & Farm"}, {"uro": "Ípá", "ipa": "[ípá]", "english": "Navel", "pos": "n", "category": "Other"}, {"uro": "Íphẹ́ àrò", "ipa": "[íɸɛ́ àrò]", "english": "Catfish", "pos": "n", "category": "Animals"}, {"uro": "Iphi", "ipa": "[īɸī]", "english": "Tomorrow", "pos": "n", "category": "Other"}, {"uro": "Ípọ̀", "ipa": "[ípɔ̀]", "english": "Breast", "pos": "n", "category": "Other"}, {"uro": "Ipùpù", "ipa": "[īpùpù]", "english": "Dust", "pos": "n", "category": "Other"}, {"uro": "Ìrà", "ipa": "[ìrà]", "english": "Palm branch, frond", "pos": "n", "category": "Other"}, {"uro": "Irẹn", "ipa": "[īrɛ̃̄]", "english": "Tongue", "pos": "n", "category": "Other"}, {"uro": "Ìrérè", "ipa": "[ìrérè]", "english": "Night", "pos": "n", "category": "Other"}, {"uro": "Irevó", "ipa": "[īrēvó]", "english": "Rich man", "pos": "adj", "category": "Family"}, {"uro": "Iréyín", "ipa": "[īréjĩ́]", "english": "Chief, headman", "pos": "n", "category": "Body Parts"}, {"uro": "Iréyín", "ipa": "[īréjĩ́]", "english": "Chief", "pos": "n", "category": "Other"}, {"uro": "Írída", "ipa": "[írídā]", "english": "(be) third", "pos": "v", "category": "Other"}, {"uro": "Irigírí", "ipa": "[īrīgírí]", "english": "Master", "pos": "n", "category": "Other"}, {"uro": "Irìhọ", "ipa": "[īrìhɔ̄]", "english": "Owner", "pos": "n", "category": "Other"}, {"uro": "Íro", "ipa": "[írō]", "english": "Eight", "pos": "n", "category": "Other"}, {"uro": "Irọ́fọ́yù", "ipa": "[īrɔ́fɔ́jù]", "english": "Blind person", "pos": "adj", "category": "Family"}, {"uro": "Irorẹ́", "ipa": "[īrōrɛ́]", "english": "Pimple", "pos": "n", "category": "Other"}, {"uro": "Iruran", "ipa": "[īrūrã̄]", "english": "God", "pos": "n", "category": "Other"}, {"uro": "Irùsẹn", "ipa": "[īrùsɛ̃̄]", "english": "Singer", "pos": "n", "category": "Other"}, {"uro": "Ìṣa", "ipa": "[ìʃā]", "english": "Earth (soil)", "pos": "n", "category": "Other"}, {"uro": "Ìṣákọ́lẹ̀", "ipa": "[ìʃákɔ́lɛ̀]", "english": "Tribute", "pos": "n", "category": "Other"}, {"uro": "Ìṣàn", "ipa": "[ìʃã̀]", "english": "Beginning", "pos": "n", "category": "Other"}, {"uro": "Ìsẹ̀", "ipa": "[ìsɛ̀]", "english": "Millet (rainy season)", "pos": "n", "category": "Time"}, {"uro": "Ìsẹ̀", "ipa": "[ìsɛ̀]", "english": "Guinea Corn", "pos": "n", "category": "Other"}, {"uro": "Ishwè", "ipa": "[īɸè]", "english": "Kolanut", "pos": "n", "category": "Other"}, {"uro": "Íshwí", "ipa": "[íɸí]", "english": "Seven", "pos": "n", "category": "Other"}, {"uro": "Ìsi", "ipa": "[ìsī]", "english": "Yam", "pos": "n", "category": "Other"}, {"uro": "Íṣi", "ipa": "[íʃī]", "english": "Medicine", "pos": "n", "category": "Other"}, {"uro": "Íṣi", "ipa": "[íʃī]", "english": "Amulet, charm, fetish", "pos": "n", "category": "Other"}, {"uro": "Iṣi", "ipa": "[īʃī]", "english": "Ground, land", "pos": "n", "category": "Other"}, {"uro": "Iṣi", "ipa": "[īʃī]", "english": "Race", "pos": "n", "category": "Other"}, {"uro": "Isínrárùnwà", "ipa": "[īsĩ́rárũ̀wà]", "english": "Fur", "pos": "n", "category": "Other"}, {"uro": "Isinsi iṣì", "ipa": "[īsĩ̄sī īʃì]", "english": "Fetish (juju)", "pos": "n", "category": "Other"}, {"uro": "Isírín", "ipa": "[īsírĩ́]", "english": "Hair (of head)", "pos": "n", "category": "Body Parts"}, {"uro": "Íṣìṣiri", "ipa": "[íʃìʃīrī]", "english": "Grass", "pos": "n", "category": "Other"}, {"uro": "Ísọ́", "ipa": "[ísɔ́]", "english": "Fire", "pos": "n", "category": "Other"}, {"uro": "Ísọ́", "ipa": "[ísɔ́]", "english": "Light", "pos": "v", "category": "Other"}, {"uro": "Isúkì", "ipa": "[īsúkì]", "english": "Hiccough (n)", "pos": "n", "category": "Other"}, {"uro": "Íta", "ipa": "[ítā]", "english": "Stone", "pos": "n", "category": "Other"}, {"uro": "Íta", "ipa": "[ítā]", "english": "Juice", "pos": "n", "category": "Other"}, {"uro": "Íta", "ipa": "[ítā]", "english": "Rock (large)", "pos": "n", "category": "Other"}, {"uro": "Ita ẹsẹyọ", "ipa": "[ītā ɛ̄sɛ̄jɔ̄]", "english": "Grinder Stone", "pos": "n", "category": "Other"}, {"uro": "Ìtabà", "ipa": "[ìtābà]", "english": "Tobacco", "pos": "n", "category": "Other"}, {"uro": "Ítáǹtan", "ipa": "[ítáǹtã̄]", "english": "(be) new", "pos": "v", "category": "Other"}, {"uro": "Ìtọ́", "ipa": "[ìtɔ́]", "english": "Urine", "pos": "n", "category": "Other"}, {"uro": "Itọntọ ásọ́", "ipa": "[ītɔ̄ntɔ̄ ásɔ́]", "english": "Cloth (materials)", "pos": "n", "category": "Other"}, {"uro": "Itú", "ipa": "[ītú]", "english": "Rest", "pos": "v", "category": "Other"}, {"uro": "Ítú", "ipa": "[ítú]", "english": "Journey, trip (n)", "pos": "n", "category": "Other"}, {"uro": "Ìveve", "ipa": "[ìvēvē]", "english": "Food", "pos": "n", "category": "Other"}, {"uro": "Ìwùnṣẹ", "ipa": "[ìwùnʃɛ̄]", "english": "Hunter", "pos": "n", "category": "Other"}, {"uro": "Ìyà", "ipa": "[ìjà]", "english": "Suffer", "pos": "v", "category": "Other"}, {"uro": "Ìyàta", "ipa": "[ìjàtā]", "english": "Middle", "pos": "n", "category": "Other"}, {"uro": "Íyè", "ipa": "[íjè]", "english": "Ten", "pos": "n", "category": "Other"}, {"uro": "Íyè-gu-ìda", "ipa": "[íjè-gū-ìdā]", "english": "Thirteen", "pos": "n", "category": "Other"}, {"uro": "Íyè-gu-ìfà", "ipa": "[íjè-gū-ìfà]", "english": "Sixteen", "pos": "n", "category": "Other"}, {"uro": "Íyè-gu-íńdá", "ipa": "[íjè-gū-ĩ́dá]", "english": "Nineteen", "pos": "n", "category": "Other"}, {"uro": "Íyè-gu-inẹ́", "ipa": "[íjè-gū-īnɛ́]", "english": "Fourteen", "pos": "n", "category": "Other"}, {"uro": "Íyè-gu-íńtọ́", "ipa": "[íjè-gū-ĩ́tɔ́]", "english": "Fifteen", "pos": "n", "category": "Other"}, {"uro": "Íyè-gu-íro", "ipa": "[íjè-gū-írō]", "english": "Eighteen", "pos": "n", "category": "Other"}, {"uro": "Íyè-gu-íshwí", "ipa": "[íjè-gū-íɸí]", "english": "Seventeen", "pos": "n", "category": "Other"}, {"uro": "Íyè-gu-ìyí", "ipa": "[íjè-gū-ìjí]", "english": "Twelve", "pos": "n", "category": "Other"}, {"uro": "Íyè-gu-ọ̀lọ̀", "ipa": "[íjè-gū-ɔ̀lɔ̀]", "english": "Eleven", "pos": "n", "category": "Other"}, {"uro": "Iyeeṣí", "ipa": "[ījēēʃí]", "english": "(be) second", "pos": "v", "category": "Other"}, {"uro": "Íyẹ́n", "ipa": "[íjɛ̃́]", "english": "Fetus", "pos": "n", "category": "Other"}, {"uro": "Ìyẹ̀n", "ipa": "[ìjɛ̃̀]", "english": "Well", "pos": "n", "category": "Other"}, {"uro": "Íyẹ́n nẹketú", "ipa": "[íjɛ̃́ nɛ̄kētú]", "english": "Miscarriage", "pos": "n", "category": "Other"}, {"uro": "Íyerẹdà", "ipa": "[íjērɛ̄dà]", "english": "Seventy", "pos": "n", "category": "Other"}, {"uro": "Íyerẹdà-rẹ-ìda", "ipa": "[íjērɛ̄dà-rɛ̄-ìdā]", "english": "Seventy-three", "pos": "n", "category": "Other"}, {"uro": "Íyerẹdà-rẹ-ìfà", "ipa": "[íjērɛ̄dà-rɛ̄-ìfà]", "english": "Seventy-six", "pos": "n", "category": "Other"}, {"uro": "Íyerẹdà-rẹ-íńdá", "ipa": "[íjērɛ̄dà-rɛ̄-ĩ́dá]", "english": "Seventy-nine", "pos": "n", "category": "Other"}, {"uro": "Íyerẹdà-rẹ-inẹ́", "ipa": "[íjērɛ̄dà-rɛ̄-īnɛ́]", "english": "Seventy-four", "pos": "n", "category": "Other"}, {"uro": "Íyerẹdà-rẹ-íńtọ́", "ipa": "[íjērɛ̄dà-rɛ̄-ĩ́tɔ́]", "english": "Seventy-five", "pos": "n", "category": "Other"}, {"uro": "Íyerẹdà-rẹ-íro", "ipa": "[íjērɛ̄dà-rɛ̄-írō]", "english": "Seventy-eight", "pos": "n", "category": "Other"}, {"uro": "Íyerẹdà-rẹ-íshwí", "ipa": "[íjērɛ̄dà-rɛ̄-íɸí]", "english": "Seventy-seven", "pos": "n", "category": "Other"}, {"uro": "Íyerẹdà-rẹ-ìyí", "ipa": "[íjērɛ̄dà-rɛ̄-ìjí]", "english": "Seventy-two", "pos": "n", "category": "Other"}, {"uro": "Íyerẹdà-rẹ-ọ̀lọ̀", "ipa": "[íjērɛ̄dà-rɛ̄-ɔ̀lɔ̀]", "english": "Seventy-one", "pos": "n", "category": "Other"}, {"uro": "Íyerẹnẹ́", "ipa": "[íjērɛ̄nɛ́]", "english": "Ninety", "pos": "n", "category": "Other"}, {"uro": "Íyerẹnẹ́-rẹ-ìda", "ipa": "[íjērɛ̄nɛ́-rɛ̄-ìdā]", "english": "Ninety-three", "pos": "n", "category": "Other"}, {"uro": "Íyerẹnẹ́-rẹ-ìfà", "ipa": "[íjērɛ̄nɛ́-rɛ̄-ìfà]", "english": "Ninety-six", "pos": "n", "category": "Other"}, {"uro": "Íyerẹnẹ́-rẹ-íńdá", "ipa": "[íjērɛ̄nɛ́-rɛ̄-ĩ́dá]", "english": "Ninety-nine", "pos": "n", "category": "Other"}, {"uro": "Íyerẹnẹ́-rẹ-inẹ́", "ipa": "[íjērɛ̄nɛ́-rɛ̄-īnɛ́]", "english": "Ninety-four", "pos": "n", "category": "Other"}, {"uro": "Íyerẹnẹ́-rẹ-íńtọ́", "ipa": "[íjērɛ̄nɛ́-rɛ̄-ĩ́tɔ́]", "english": "Ninety-five", "pos": "n", "category": "Other"}, {"uro": "Íyerẹnẹ́-rẹ-íro", "ipa": "[íjērɛ̄nɛ́-rɛ̄-írō]", "english": "Ninety-eight", "pos": "n", "category": "Other"}, {"uro": "Íyerẹnẹ́-rẹ-íshwí", "ipa": "[íjērɛ̄nɛ́-rɛ̄-íɸí]", "english": "Ninety-seven", "pos": "n", "category": "Other"}, {"uro": "Íyerẹnẹ́-rẹ-ìyí", "ipa": "[íjērɛ̄nɛ́-rɛ̄-ìjí]", "english": "Ninety-two", "pos": "n", "category": "Other"}, {"uro": "Íyerẹnẹ́-rẹ-ọ̀lọ̀", "ipa": "[íjērɛ̄nɛ́-rɛ̄-ɔ̀lɔ̀]", "english": "Ninety-one", "pos": "n", "category": "Other"}, {"uro": "Íyerẹ̀yí", "ipa": "[íjērɛ̀jí]", "english": "Fifty", "pos": "n", "category": "Other"}, {"uro": "Íyerẹ̀yí-rẹ-ìda", "ipa": "[íjērɛ̀jí-rɛ̄-ìdā]", "english": "Fifty-three", "pos": "n", "category": "Other"}, {"uro": "Íyerẹ̀yí-rẹ-ìfà", "ipa": "[íjērɛ̀jí-rɛ̄-ìfà]", "english": "Fifty-six", "pos": "n", "category": "Other"}, {"uro": "Íyerẹ̀yí-rẹ-íńdá", "ipa": "[íjērɛ̀jí-rɛ̄-ĩ́dá]", "english": "Fifty-nine", "pos": "n", "category": "Other"}, {"uro": "Íyerẹ̀yí-rẹ-inẹ́", "ipa": "[íjērɛ̀jí-rɛ̄-īnɛ́]", "english": "Fifty-four", "pos": "n", "category": "Other"}, {"uro": "Íyerẹ̀yí-rẹ-íńtọ́", "ipa": "[íjērɛ̀jí-rɛ̄-ĩ́tɔ́]", "english": "Fifty-five", "pos": "n", "category": "Other"}, {"uro": "Íyerẹ̀yí-rẹ-íro", "ipa": "[íjērɛ̀jí-rɛ̄-írō]", "english": "Fifty-eight", "pos": "n", "category": "Other"}, {"uro": "Íyerẹ̀yí-rẹ-íshwí", "ipa": "[íjērɛ̀jí-rɛ̄-íɸí]", "english": "Fifty-seven", "pos": "n", "category": "Other"}, {"uro": "Íyerẹ̀yí-rẹ-ìyí", "ipa": "[íjērɛ̀jí-rɛ̄-ìjí]", "english": "Fifty-two", "pos": "n", "category": "Other"}, {"uro": "Íyerẹ̀yí-rẹ-ọ̀lọ̀", "ipa": "[íjērɛ̀jí-rɛ̄-ɔ̀lɔ̀]", "english": "Fifty-one", "pos": "n", "category": "Other"}, {"uro": "Iyẹriyẹ", "ipa": "[ījɛ̄rījɛ̄]", "english": "Mushroom", "pos": "n", "category": "Other"}, {"uro": "Iyẹ̀yẹ̀", "ipa": "[ījɛ᷈̀jɛ᷈̀]", "english": "Sand", "pos": "n", "category": "Other"}, {"uro": "Ìyí", "ipa": "[ìjí]", "english": "Two", "pos": "n", "category": "Other"}, {"uro": "Íyọ́ egírí", "ipa": "[íjɔ́ ēgírí]", "english": "Louse", "pos": "n", "category": "Other"}, {"uro": "Iyo ìgo", "ipa": "[ījō ìgō]", "english": "Ulcer (leg)", "pos": "n", "category": "Other"}, {"uro": "Íyọ́lọ́ únwa", "ipa": "[íjɔ́lɔ́ únwā]", "english": "Twin", "pos": "n", "category": "Other"}, {"uro": "Jà", "ipa": "[d͡ʒà]", "english": "Fight", "pos": "v", "category": "Other"}, {"uro": "Jàada", "ipa": "[d͡ʒàādā]", "english": "Hold (in Hand)", "pos": "n", "category": "Body Parts"}, {"uro": "Jáwẹ́nchí", "ipa": "[d͡ʒáwɛ̃́t͡ʃí]", "english": "Abandon", "pos": "v", "category": "Other"}, {"uro": "Jè etitọ", "ipa": "[d͡ʒè ētītɔ̄]", "english": "(be) honest", "pos": "v", "category": "Other"}, {"uro": "Jée", "ipa": "[d͡ʒéē]", "english": "Say (direct Speech)", "pos": "n", "category": "Other"}, {"uro": "Jéwẹ́nṣín", "ipa": "[dʒéwɛ̃́ʃĩ́]", "english": "Divine,prophesy(v)", "pos": "v", "category": "Other"}, {"uro": "Ji", "ipa": "[d͡ʒī]", "english": "Beat", "pos": "v", "category": "Other"}, {"uro": "Jì", "ipa": "[d͡ʒì]", "english": "Far", "pos": "n", "category": "Other"}, {"uro": "Jìn", "ipa": "[d͡ʒĩ̀]", "english": "(be) deep", "pos": "v", "category": "Other"}, {"uro": "Jìn", "ipa": "[d͡ʒĩ̀]", "english": "Deepen", "pos": "v", "category": "Other"}, {"uro": "Jó òwọ̀n", "ipa": "[d͡ʒó òwɔ̃̀]", "english": "Reply", "pos": "n", "category": "Other"}, {"uro": "Jòji", "ipa": "[d͡ʒòd͡ʒī]", "english": "Meet, encounter", "pos": "v", "category": "Other"}, {"uro": "Jọ̀ji", "ipa": "[d͡ʒɔ̀d͡ʒī]", "english": "Approach (v)", "pos": "v", "category": "Other"}, {"uro": "Jọpọ̀", "ipa": "[d͡ʒɔ̄pɔ̀]", "english": "Remain, stay", "pos": "v", "category": "Other"}, {"uro": "Ju", "ipa": "[d͡ʒū]", "english": "Eat", "pos": "v", "category": "Other"}, {"uro": "Jùúkú", "ipa": "[d͡ʒùúkú]", "english": "(be) jealous", "pos": "v", "category": "Other"}, {"uro": "Kà", "ipa": "[kà]", "english": "Count (v)", "pos": "v", "category": "Other"}, {"uro": "Kakíesí", "ipa": "[kākíēsí]", "english": "Notice (v)", "pos": "v", "category": "Other"}, {"uro": "Kándó", "ipa": "[kã́dó]", "english": "Work", "pos": "n", "category": "Other"}, {"uro": "Keda", "ipa": "[kēdā]", "english": "Third", "pos": "n", "category": "Other"}, {"uro": "Kée", "ipa": "[kéē]", "english": "Make", "pos": "n", "category": "Other"}, {"uro": "Kefa", "ipa": "[kēfā]", "english": "Sixth", "pos": "n", "category": "Other"}, {"uro": "Kéji ùke", "ipa": "[kéd͡ʒī ùkē]", "english": "Hurt oneself", "pos": "v", "category": "Other"}, {"uro": "Kèjùke", "ipa": "[kèd͡ʒùkē]", "english": "Wound, sore", "pos": "n", "category": "Other"}, {"uro": "Kẹ̀n", "ipa": "[kɛ̃̀]", "english": "(be) fat, (be) thick", "pos": "v", "category": "Other"}, {"uro": "Kenda", "ipa": "[kēndā]", "english": "Nineth", "pos": "n", "category": "Other"}, {"uro": "Kenẹ", "ipa": "[kēnɛ̄]", "english": "Fourth", "pos": "n", "category": "Other"}, {"uro": "Kenka", "ipa": "[kēŋkā]", "english": "First", "pos": "n", "category": "Other"}, {"uro": "Kentá", "ipa": "[kēntá]", "english": "Finish (intr.)", "pos": "v", "category": "Other"}, {"uro": "Kentọn", "ipa": "[kēntɔ̃̄]", "english": "Fifth", "pos": "n", "category": "Other"}, {"uro": "Kérekère", "ipa": "[kérēkèrē]", "english": "Scorpion", "pos": "n", "category": "Other"}, {"uro": "Kero", "ipa": "[kērō]", "english": "Eighth", "pos": "n", "category": "Other"}, {"uro": "Keshwi", "ipa": "[kēɸī]", "english": "Seventh", "pos": "n", "category": "Other"}, {"uro": "Kẹ́tẹ́kẹ́tẹ́", "ipa": "[kɛ́tɛ́kɛ́tɛ́]", "english": "Stallion", "pos": "n", "category": "Other"}, {"uro": "Kètò", "ipa": "[kètò]", "english": "Plan (n)", "pos": "n", "category": "Other"}, {"uro": "Keyee", "ipa": "[kējēē]", "english": "Tenth", "pos": "n", "category": "Other"}, {"uro": "Keyi", "ipa": "[kējī]", "english": "Second", "pos": "n", "category": "Other"}, {"uro": "Kéyọrí", "ipa": "[kéjɔ̄rí]", "english": "Succeed", "pos": "v", "category": "Other"}, {"uro": "Kí ẹyẹ", "ipa": "[kí ɛ̄jɛ̄]", "english": "Where?", "pos": "n", "category": "Other"}, {"uro": "Kìnìhún", "ipa": "[kìnìhún]", "english": "Lion", "pos": "n", "category": "Other"}, {"uro": "Kò", "ipa": "[kò̩]", "english": "Hang up", "pos": "v", "category": "Other"}, {"uro": "Kọ", "ipa": "[kɔ̄]", "english": "Cough (v)", "pos": "v", "category": "Other"}, {"uro": "Ko sinsín", "ipa": "[kō sĩ̄sĩ́]", "english": "(be) dim", "pos": "v", "category": "Other"}, {"uro": "Kọ́já ẹ́dídọ", "ipa": "[kɔ́dʒá ɛ́dídɔ̄]", "english": "Cross (river)", "pos": "v", "category": "Other"}, {"uro": "Kọkọ ọ̀gẹ̀dẹ̀", "ipa": "[kɔ̄kɔ̄ ɔ̀gɛ̀dɛ̀]", "english": "Plantain", "pos": "n", "category": "Other"}, {"uro": "Kọ̀kọ̀ ọ̀nsọ̀", "ipa": "[kɔ̀kɔ̀ ɔ̃̀sɔ̀]", "english": "Big(gest) drum", "pos": "adj", "category": "Other"}, {"uro": "Kòkòrò", "ipa": "[kòkòrò]", "english": "Insects", "pos": "n", "category": "Other"}, {"uro": "Kọkoùnsẹ̀n", "ipa": "[kɔ̄kōũ̀sɛ̃̀]", "english": "Sea", "pos": "n", "category": "Other"}, {"uro": "Kòlo", "ipa": "[kòlō]", "english": "Earthworm", "pos": "n", "category": "Other"}, {"uro": "Kóńdọ́", "ipa": "[kóndɔ́]", "english": "Work", "pos": "n", "category": "Other"}, {"uro": "Kọ̀ǹkọ̀", "ipa": "[kɔ̀ǹkɔ̀]", "english": "Toad", "pos": "n", "category": "Other"}, {"uro": "Kònsẹ", "ipa": "[kõ̀sɛ̄]", "english": "Sing", "pos": "v", "category": "Other"}, {"uro": "Kọọ", "ipa": "[kɔ̄ɔ̄]", "english": "Learn", "pos": "n", "category": "Other"}, {"uro": "Kórá", "ipa": "[kórá]", "english": "Hoe (farm)", "pos": "n", "category": "Other"}, {"uro": "Kóro", "ipa": "[kórō]", "english": "Seed", "pos": "n", "category": "Other"}, {"uro": "Kú", "ipa": "[kú]", "english": "Die", "pos": "v", "category": "Other"}, {"uro": "Kúkùǹdú", "ipa": "[kúkùǹdú]", "english": "Potato", "pos": "n", "category": "Other"}, {"uro": "Kùmẹ̀", "ipa": "[kùmɛ̀]", "english": "Play(v)", "pos": "v", "category": "Other"}, {"uro": "Kun", "ipa": "[kũ̄]", "english": "Pierce", "pos": "n", "category": "Other"}, {"uro": "Kpan", "ipa": "[k͡pã̄]", "english": "(be) sour", "pos": "v", "category": "Other"}, {"uro": "Kpàtẹ́wọ́", "ipa": "[k͡pàtɛ́wɔ́]", "english": "Clap (hands)", "pos": "v", "category": "Body Parts"}, {"uro": "Kpẹ́kpẹ́yẹ", "ipa": "[k͡pɛ́k͡pɛ́jɛ̄]", "english": "Duck", "pos": "n", "category": "Other"}, {"uro": "Kpẹ̀rẹ́", "ipa": "[k͡pɛ̄̀rɛ́]", "english": "Imitate", "pos": "v", "category": "Other"}, {"uro": "Kpẹ́rẹ́sẹ́", "ipa": "[k͡pɛ́rɛ́sɛ́]", "english": "(be) flat", "pos": "v", "category": "Other"}, {"uro": "Kpi", "ipa": "[k͡pī]", "english": "(be) strong (physically)", "pos": "v", "category": "Other"}, {"uro": "Kpi", "ipa": "[k͡pī]", "english": "Strength", "pos": "n", "category": "Other"}, {"uro": "Kpuimọ̀", "ipa": "[k͡pūīmɔ̀]", "english": "(be) hungry, hunger (v)", "pos": "v", "category": "Other"}, {"uro": "Kpushwẹ", "ipa": "[k͡pūɸɛ̄]", "english": "Fisherman", "pos": "n", "category": "Animals"}, {"uro": "Kpúu", "ipa": "[k͡púū]", "english": "Kill", "pos": "v", "category": "Other"}, {"uro": "La", "ipa": "[lā]", "english": "Pass (by)", "pos": "n", "category": "Other"}, {"uro": "Láa", "ipa": "[láā]", "english": "Split (tree)", "pos": "n", "category": "Other"}, {"uro": "Labalábá", "ipa": "[lābālábá]", "english": "Butterfly", "pos": "n", "category": "Other"}, {"uro": "Lẹ̀", "ipa": "[lɛ̀]", "english": "(be) sticky", "pos": "v", "category": "Other"}, {"uro": "Li", "ipa": "[lī]", "english": "Swim", "pos": "v", "category": "Other"}, {"uro": "Lo shwẹ́n", "ipa": "[lō ɸɛ̃́]", "english": "Sharpen, bring to point (arrow)", "pos": "v", "category": "Other"}, {"uro": "Logọ̀hu", "ipa": "[lōgɔ̀hū]", "english": "(be) together", "pos": "v", "category": "Other"}, {"uro": "Lòpa", "ipa": "[lòpā]", "english": "(be) bad", "pos": "v", "category": "Other"}, {"uro": "Má", "ipa": "[má]", "english": "Late", "pos": "adv", "category": "Other"}, {"uro": "Ma aṣa", "ipa": "[mā āʃā]", "english": "Mould (pot)", "pos": "n", "category": "Other"}, {"uro": "Máa", "ipa": "[máā]", "english": "Divide (share Out)", "pos": "n", "category": "Other"}, {"uro": "Mái", "ipa": "[máī]", "english": "What?", "pos": "n", "category": "Other"}, {"uro": "Masì gíẹ̀", "ipa": "[māsì gíɛ̀]", "english": "Which (one)?", "pos": "n", "category": "Other"}, {"uro": "Mávàadìẹ̀", "ipa": "[mávàādìɛ̀]", "english": "Why?", "pos": "n", "category": "Other"}, {"uro": "Mẹ", "ipa": "[mɛ̄]", "english": "Borrow", "pos": "v", "category": "Other"}, {"uro": "Mọ́gwọ", "ipa": "[mɔ́gʷɔ̄]", "english": "Suck", "pos": "v", "category": "Other"}, {"uro": "Mukegwẹ", "ipa": "[mūkēgʷɛ̄]", "english": "How?", "pos": "n", "category": "Other"}, {"uro": "Músùn", "ipa": "[músũ̀]", "english": "Cat", "pos": "n", "category": "Animals"}, {"uro": "Na", "ipa": "[nā]", "english": "Stretch", "pos": "v", "category": "Other"}, {"uro": "Narundọ/ ináróndọ́", "ipa": "[nārũ̄dɔ̄/ īnáróndɔ́]", "english": "Messenger", "pos": "n", "category": "Other"}, {"uro": "Ńbiju", "ipa": "[ńbīd͡ʒū]", "english": "Wink (eye)", "pos": "n", "category": "Other"}, {"uro": "Ǹdẹ̀", "ipa": "[ǹdɛ̀]", "english": "(be) big", "pos": "v", "category": "Other"}, {"uro": "Ndọ", "ipa": "[n̄dɔ̄]", "english": "Send (something to someone)", "pos": "v", "category": "Other"}, {"uro": "Ńdọ eléshwi/ ńwẹ́dọ̀ eléshwi", "ipa": "[ńdɔ̄ ēléɸī/ ńwɛ́dɔ̀ ēléɸī]", "english": "Sister (elder/younger)", "pos": "n", "category": "Other"}, {"uro": "Ndọ eyẹ́vò eléshwi/ ńwẹ̀dọ̀ eyẹ́vọ̀ eléshwi", "ipa": "[ndɔ̄ ējɛ́vò ēléɸī/ ńwɛ̀dɔ̀ ējɛ́vɔ̀ ēléɸī]", "english": "Mother's sister (aunt)", "pos": "n", "category": "Family"}, {"uro": "Ńdọ̀ óṣivo eléshwi/ ńwẹ̀dọ̀ óṣivo eléshwi", "ipa": "[ńdɔ̀ óʃīvō ēléɸī/ ńwɛ̀dɔ̀ óʃīvō ēléɸī]", "english": "Father's sister (aunt)", "pos": "n", "category": "Family"}, {"uro": "Ńdọ̀ uyivo", "ipa": "[ńdɔ̀ ūjīvō]", "english": "Mother's brother (uncle)", "pos": "n", "category": "Family"}, {"uro": "Ńdọkwọ/ńwẹ̀d ọ́kwọ", "ipa": "[ńdɔ̄kwɔ̄/ńwɛ̀d ɔ̄́kwɔ̄]", "english": "Brother (elder/younger)", "pos": "n", "category": "Other"}, {"uro": "Ǹdù", "ipa": "[ǹdù]", "english": "(be) high", "pos": "v", "category": "Other"}, {"uro": "Ǹdù ẹ̀yẹ̀", "ipa": "[ǹdù ɛ̀jɛ̀]", "english": "Bleed", "pos": "v", "category": "Other"}, {"uro": "Nẹ́sì gíẹ̀", "ipa": "[nɛ́sì gíɛ̀]", "english": "Who?", "pos": "n", "category": "Other"}, {"uro": "Nga", "ipa": "[ngā]", "english": "Drive away", "pos": "v", "category": "Other"}, {"uro": "Ǹgbà", "ipa": "[ǹg͡bà]", "english": "Whistle (N)", "pos": "n", "category": "Other"}, {"uro": "Ǹgbà", "ipa": "[ǹgbà]", "english": "Shiver, tremble", "pos": "v", "category": "Other"}, {"uro": "Ngbu", "ipa": "[ngbū]", "english": "Groan", "pos": "v", "category": "Other"}, {"uro": "Ngbu", "ipa": "[n̄gbū]", "english": "Groan (with pain)", "pos": "v", "category": "Other"}, {"uro": "Ngin", "ipa": "[ŋgĩ̄]", "english": "Few", "pos": "adj", "category": "Other"}, {"uro": "Ngó", "ipa": "[ngó]", "english": "Full", "pos": "n", "category": "Other"}, {"uro": "Ńgọ́", "ipa": "[ŋ́gɔ́]", "english": "Many", "pos": "adj", "category": "Family"}, {"uro": "Ngọṣẹ", "ipa": "[ngɔ̄ʃɛ̄]", "english": "Snore", "pos": "v", "category": "Other"}, {"uro": "Ńgù", "ipa": "[ńgù]", "english": "Open", "pos": "v", "category": "Other"}, {"uro": "Ǹgù", "ipa": "[ǹgù]", "english": "Perspire, sweat", "pos": "n", "category": "Other"}, {"uro": "Nìdọ", "ipa": "[nìdɔ̄]", "english": "Accompany", "pos": "v", "category": "Other"}, {"uro": "Ǹkùn", "ipa": "[ǹkũ̀]", "english": "Tiger", "pos": "n", "category": "Other"}, {"uro": "Ńpò ńpá", "ipa": "[ńpò ńpá]", "english": "Carry (child) on back", "pos": "v", "category": "Family"}, {"uro": "Ǹsẹ̀", "ipa": "[ǹsɛ̀]", "english": "Flood (n)", "pos": "n", "category": "Other"}, {"uro": "Ǹtọ́", "ipa": "[ǹtɔ́]", "english": "Right (direction)", "pos": "n", "category": "Other"}, {"uro": "Ńvè", "ipa": "[ńvè]", "english": "Take (away), carry away", "pos": "v", "category": "Other"}, {"uro": "Ńwẹ̀dọ̀ éṣívò", "ipa": "[ńwɛ̀dɔ̀ éʃívò]", "english": "Cousin", "pos": "n", "category": "Other"}, {"uro": "Ńwẹ̀dọ̀ṣí ọkwọ/ ndọṣívo ọkwọ̀", "ipa": "[ńwɛ̀dɔ̀ʃí ɔ̄kwɔ̄/ n̄dɔ̄ʃívō ɔ̄kwɔ̀]", "english": "Father's brother (uncle)", "pos": "n", "category": "Family"}, {"uro": "Ńwọ́ kwọ", "ipa": "[ŋ́͡mwɔ́ kʷɔ̄]", "english": "This man", "pos": "n", "category": "Family"}, {"uro": "Ńwọ́n", "ipa": "[ńwɔ̃́]", "english": "Nose", "pos": "n", "category": "Body Parts"}, {"uro": "Òbu ẹ̀nẹ", "ipa": "[òbū ɛ̀nɛ̄]", "english": "Stupid person", "pos": "n", "category": "Family"}, {"uro": "Òdiì", "ipa": "[òdīì]", "english": "Rat", "pos": "n", "category": "Other"}, {"uro": "Òdòdó", "ipa": "[òdòdó]", "english": "Flower", "pos": "n", "category": "Other"}, {"uro": "Òdògba", "ipa": "[òdògbā]", "english": "Agama lizard (red-headed)", "pos": "n", "category": "Animals"}, {"uro": "Odua", "ipa": "[ōdūā]", "english": "Deity of rainbow", "pos": "n", "category": "Nature"}, {"uro": "Òduwọ̀n", "ipa": "[òdūwɔ̃̀]", "english": "Dimension, shape", "pos": "n", "category": "Other"}, {"uro": "Òfìfo", "ipa": "[òfìfō]", "english": "(be) hollow", "pos": "v", "category": "Other"}, {"uro": "Ógbógbó", "ipa": "[óg͡bóg͡bó]", "english": "(be) red", "pos": "v", "category": "Other"}, {"uro": "Ógo", "ipa": "[ógō]", "english": "Fruit", "pos": "n", "category": "Other"}, {"uro": "Ógo", "ipa": "[ógō]", "english": "Forest", "pos": "n", "category": "Other"}, {"uro": "Ògo", "ipa": "[ògō]", "english": "Splendour, glory", "pos": "n", "category": "Other"}, {"uro": "Ògògó ínṣí", "ipa": "[ògògó i᷈́nʃí]", "english": "Drought, famine", "pos": "n", "category": "Other"}, {"uro": "Ogolomaṣi", "ipa": "[ōgōlōmāʃī]", "english": "Pawpaw, papaya", "pos": "n", "category": "Other"}, {"uro": "Ògòngòn", "ipa": "[òɡõ̀ɡõ̀]", "english": "Ostrich", "pos": "n", "category": "Other"}, {"uro": "Ogún", "ipa": "[ōgṹ]", "english": "Inheritance", "pos": "n", "category": "Other"}, {"uro": "Òhà", "ipa": "[òhà]", "english": "Ditch", "pos": "n", "category": "Other"}, {"uro": "Òhà", "ipa": "[òhà]", "english": "Pit", "pos": "n", "category": "Other"}, {"uro": "Òha nàn", "ipa": "[òhā nã̀]", "english": "Anus", "pos": "n", "category": "Other"}, {"uro": "Ohó", "ipa": "[ōhó]", "english": "Fear", "pos": "n", "category": "Other"}, {"uro": "Óhún", "ipa": "[óhṹ]", "english": "Cane rat, cutting grass, grass cutter", "pos": "n", "category": "Other"}, {"uro": "Òjìjí", "ipa": "[òd͡ʒìd͡ʒí]", "english": "Shadow", "pos": "n", "category": "Other"}, {"uro": "Ójú", "ipa": "[ód͡ʒú]", "english": "Slave", "pos": "n", "category": "Other"}, {"uro": "Òkọ", "ipa": "[òkɔ̄]", "english": "He Goat", "pos": "n", "category": "Animals"}, {"uro": "Òkóbó", "ipa": "[òkóbó]", "english": "(be) impotent", "pos": "v", "category": "Other"}, {"uro": "Okokò", "ipa": "[ōkōkò]", "english": "Thigh", "pos": "n", "category": "Other"}, {"uro": "Òkpàràdó", "ipa": "[òk͡pàràdó]", "english": "Groundnut", "pos": "n", "category": "Food & Farm"}, {"uro": "Òlo", "ipa": "[òlō]", "english": "War", "pos": "n", "category": "Other"}, {"uro": "Ólógun", "ipa": "[ólógũ̄]", "english": "Soldier", "pos": "n", "category": "Other"}, {"uro": "Ólúbi", "ipa": "[ólúbī]", "english": "Umbilical cord", "pos": "n", "category": "Other"}, {"uro": "Óńdó", "ipa": "[óndó]", "english": "Ashes", "pos": "n", "category": "Other"}, {"uro": "Òndù", "ipa": "[õ̀dù]", "english": "Load, burden (n)", "pos": "n", "category": "Other"}, {"uro": "Ònsẹ", "ipa": "[õ̀sɛ̄]", "english": "Song", "pos": "n", "category": "Other"}, {"uro": "Ònsẹ̀ ítú", "ipa": "[õ̀sɛ̀ ítú]", "english": "Travel, go on a trip (v)", "pos": "v", "category": "Other"}, {"uro": "Òǹsu", "ipa": "[òǹsū]", "english": "Back (of something)", "pos": "n", "category": "Other"}, {"uro": "Òǹsu", "ipa": "[òǹsū]", "english": "Backʷard (direction)", "pos": "n", "category": "Other"}, {"uro": "Óńtú", "ipa": "[óntú]", "english": "Bud", "pos": "n", "category": "Other"}, {"uro": "Ópú", "ipa": "[ópú]", "english": "Dog", "pos": "n", "category": "Animals"}, {"uro": "Oranhò", "ipa": "[ōrã̄hò]", "english": "Toes", "pos": "n", "category": "Other"}, {"uro": "Oránwó", "ipa": "[ōrã́wó]", "english": "Fingers", "pos": "n", "category": "Other"}, {"uro": "Órin útó", "ipa": "[órĩ̄ útó]", "english": "Earwax", "pos": "n", "category": "Other"}, {"uro": "Orínda", "ipa": "[ōrĩ́dā]", "english": "Sixty", "pos": "n", "category": "Other"}, {"uro": "Oríńdà", "ipa": "[ōrĩ́dà]", "english": "One hundred eighty", "pos": "n", "category": "Other"}, {"uro": "Orínda-rẹ-ìda", "ipa": "[ōrĩ́dā-rɛ̄-ìdā]", "english": "Sixty-three", "pos": "n", "category": "Other"}, {"uro": "Oríńdà-rẹ-ìda", "ipa": "[ōrĩ́dà-rɛ̄-ìdā]", "english": "One hundred eighty-three", "pos": "n", "category": "Other"}, {"uro": "Orínda-rẹ-ìfà", "ipa": "[ōrĩ́dā-rɛ̄-ìfà]", "english": "Sixty-six", "pos": "n", "category": "Other"}, {"uro": "Oríńdà-rẹ-ìfà", "ipa": "[ōrĩ́dà-rɛ̄-ìfà]", "english": "One hundred eighty-six", "pos": "n", "category": "Other"}, {"uro": "Orínda-rẹ-íńdá", "ipa": "[ōrĩ́dā-rɛ̄-ĩ́dá]", "english": "Sixty-nine", "pos": "n", "category": "Other"}, {"uro": "Oríńdà-rẹ-íńdá", "ipa": "[ōrĩ́dà-rɛ̄-ĩ́dá]", "english": "One hundred eighty-nine", "pos": "n", "category": "Other"}, {"uro": "Orínda-rẹ-inẹ́", "ipa": "[ōrĩ́dā-rɛ̄-īnɛ́]", "english": "Sixty-four", "pos": "n", "category": "Other"}, {"uro": "Oríńdà-rẹ-inẹ́", "ipa": "[ōrĩ́dà-rɛ̄-īnɛ́]", "english": "One hundred eighty-four", "pos": "n", "category": "Other"}, {"uro": "Orínda-rẹ-íńtọ́", "ipa": "[ōrĩ́dā-rɛ̄-ĩ́tɔ́]", "english": "Sixty-five", "pos": "n", "category": "Other"}, {"uro": "Oríńdà-rẹ-íńtọ́", "ipa": "[ōrĩ́dà-rɛ̄-ĩ́tɔ́]", "english": "One hundred eighty-five", "pos": "n", "category": "Other"}, {"uro": "Orínda-rẹ-íro", "ipa": "[ōrĩ́dā-rɛ̄-írō]", "english": "Sixty-eight", "pos": "n", "category": "Other"}, {"uro": "Oríńdà-rẹ-íro", "ipa": "[ōrĩ́dà-rɛ̄-írō]", "english": "One hundred eighty-eight", "pos": "n", "category": "Other"}, {"uro": "Orínda-rẹ-íshwí", "ipa": "[ōrĩ́dā-rɛ̄-íɸí]", "english": "Sixty-seven", "pos": "n", "category": "Other"}, {"uro": "Oríńdà-rẹ-íshwí", "ipa": "[ōrĩ́dà-rɛ̄-íɸí]", "english": "One hundred eighty-seven", "pos": "n", "category": "Other"}, {"uro": "Orínda-rẹ-ìyí", "ipa": "[ōrĩ́dā-rɛ̄-ìjí]", "english": "Sixty-two", "pos": "n", "category": "Other"}, {"uro": "Oríńdà-rẹ-ìyí", "ipa": "[ōrĩ́dà-rɛ̄-ìjí]", "english": "One hundred eighty-two", "pos": "n", "category": "Other"}, {"uro": "Orínda-rẹ-ọ̀lọ̀", "ipa": "[ōrĩ́dā-rɛ̄-ɔ̀lɔ̀]", "english": "Sixty-one", "pos": "n", "category": "Other"}, {"uro": "Oríńdà-rẹ-ọ̀lọ̀", "ipa": "[ōrĩ́dà-rɛ̄-ɔ̀lɔ̀]", "english": "One hundred eighty-one", "pos": "n", "category": "Other"}, {"uro": "Òrinẹ́", "ipa": "[òrīnɛ́]", "english": "Eighty", "pos": "n", "category": "Other"}, {"uro": "Òrinẹ́-rẹ-ìda", "ipa": "[òrīnɛ́-rɛ̄-ìdā]", "english": "Eighty-three", "pos": "n", "category": "Other"}, {"uro": "Òrinẹ́-rẹ-ìfà", "ipa": "[òrīnɛ́-rɛ̄-ìfà]", "english": "Eighty-six", "pos": "n", "category": "Other"}, {"uro": "Òrinẹ́-rẹ-íńdá", "ipa": "[òrīnɛ́-rɛ̄-ĩ́dá]", "english": "Eighty-nine", "pos": "n", "category": "Other"}, {"uro": "Òrinẹ́-rẹ-inẹ́", "ipa": "[òrīnɛ́-rɛ̄-īnɛ́]", "english": "Eighty-four", "pos": "n", "category": "Other"}, {"uro": "Òrinẹ́-rẹ-íńtọ́", "ipa": "[òrīnɛ́-rɛ̄-ĩ́tɔ́]", "english": "Eighty-five", "pos": "n", "category": "Other"}, {"uro": "Òrinẹ́-rẹ-íro", "ipa": "[òrīnɛ́-rɛ̄-írō]", "english": "Eighty-eight", "pos": "n", "category": "Other"}, {"uro": "Òrinẹ́-rẹ-íshwí", "ipa": "[òrīnɛ́-rɛ̄-íɸí]", "english": "Eighty-seven", "pos": "n", "category": "Other"}, {"uro": "Òrinẹ́-rẹ-ìyí", "ipa": "[òrīnɛ́-rɛ̄-ìjí]", "english": "Eighty-two", "pos": "n", "category": "Other"}, {"uro": "Òrinẹ́-rẹ-ọ̀lọ̀", "ipa": "[òrīnɛ́-rɛ̄-ɔ̀lɔ̀]", "english": "Eighty-one", "pos": "n", "category": "Other"}, {"uro": "Orínfà", "ipa": "[ōrĩ́fà]", "english": "One hundred twenty", "pos": "n", "category": "Other"}, {"uro": "Orínfà-rẹ-ìda", "ipa": "[ōrĩ́fà-rɛ̄-ìdā]", "english": "One hundred twenty-three", "pos": "n", "category": "Other"}, {"uro": "Orínfà-rẹ-ìfà", "ipa": "[ōrĩ́fà-rɛ̄-ìfà]", "english": "One hundred twenty-six", "pos": "n", "category": "Other"}, {"uro": "Orínfà-rẹ-íńdá", "ipa": "[ōrĩ́fà-rɛ̄-ĩ́dá]", "english": "One hundred twenty-nine", "pos": "n", "category": "Other"}, {"uro": "Orínfà-rẹ-inẹ́", "ipa": "[ōrĩ́fà-rɛ̄-īnɛ́]", "english": "One hundred twenty-four", "pos": "n", "category": "Other"}, {"uro": "Orínfà-rẹ-íńtọ́", "ipa": "[ōrĩ́fà-rɛ̄-ĩ́tɔ́]", "english": "One hundred twenty-five", "pos": "n", "category": "Other"}, {"uro": "Orínfà-rẹ-íro", "ipa": "[ōrĩ́fà-rɛ̄-írō]", "english": "One hundred twenty-eight", "pos": "n", "category": "Other"}, {"uro": "Orínfà-rẹ-íshwí", "ipa": "[ōrĩ́fà-rɛ̄-íɸí]", "english": "One hundred twenty-seven", "pos": "n", "category": "Other"}, {"uro": "Orínfà-rẹ-ìyí", "ipa": "[ōrĩ́fà-rɛ̄-ìjí]", "english": "One hundred twenty-two", "pos": "n", "category": "Other"}, {"uro": "Orínfà-rẹ-ọ̀lọ̀", "ipa": "[ōrĩ́fà-rɛ̄-ɔ̀lɔ̀]", "english": "One hundred twenty-one", "pos": "n", "category": "Other"}, {"uro": "Orínro", "ipa": "[ōrĩ́rō]", "english": "One hundred sixty", "pos": "n", "category": "Other"}, {"uro": "Orínro-rẹ-ìda", "ipa": "[ōrĩ́rō-rɛ̄-ìdā]", "english": "One hundred sixty-three", "pos": "n", "category": "Other"}, {"uro": "Orínro-rẹ-ìfà", "ipa": "[ōrĩ́rō-rɛ̄-ìfà]", "english": "One hundred sixty-six", "pos": "n", "category": "Other"}, {"uro": "Orínro-rẹ-íńdá", "ipa": "[ōrĩ́rō-rɛ̄-ĩ́dá]", "english": "One hundred sixty-nine", "pos": "n", "category": "Other"}, {"uro": "Orínro-rẹ-inẹ́", "ipa": "[ōrĩ́rō-rɛ̄-īnɛ́]", "english": "One hundred sixty-four", "pos": "n", "category": "Other"}, {"uro": "Orínro-rẹ-íńtọ́", "ipa": "[ōrĩ́rō-rɛ̄-ĩ́tɔ́]", "english": "One hundred sixty-five", "pos": "n", "category": "Other"}, {"uro": "Orínro-rẹ-íro", "ipa": "[ōrĩ́rō-rɛ̄-írō]", "english": "One hundred sixty-eight", "pos": "n", "category": "Other"}, {"uro": "Orínro-rẹ-íshwí", "ipa": "[ōrĩ́rō-rɛ̄-íɸí]", "english": "One hundred sixty-seven", "pos": "n", "category": "Other"}, {"uro": "Orínro-rẹ-ìyí", "ipa": "[ōrĩ́rō-rɛ̄-ìjí]", "english": "One hundred sixty-two", "pos": "n", "category": "Other"}, {"uro": "Orínro-rẹ-ọ̀lọ̀", "ipa": "[ōrĩ́rō-rɛ̄-ɔ̀lɔ̀]", "english": "One hundred sixty-one", "pos": "n", "category": "Other"}, {"uro": "Orínshwí", "ipa": "[ōrĩ́ɸí]", "english": "One hundred forty", "pos": "n", "category": "Other"}, {"uro": "Orínshwí-rẹ-ìda", "ipa": "[ōrĩ́ɸí-rɛ̄-ìdā]", "english": "One hundred forty-three", "pos": "n", "category": "Other"}, {"uro": "Orínshwí-rẹ-ìfà", "ipa": "[ōrĩ́ɸí-rɛ̄-ìfà]", "english": "One hundred forty-six", "pos": "n", "category": "Other"}, {"uro": "Orínshwí-rẹ-íńdá", "ipa": "[ōrĩ́ɸí-rɛ̄-ĩ́dá]", "english": "One hundred forty-nine", "pos": "n", "category": "Other"}, {"uro": "Orínshwí-rẹ-inẹ́", "ipa": "[ōrĩ́ɸí-rɛ̄-īnɛ́]", "english": "One hundred forty-four", "pos": "n", "category": "Other"}, {"uro": "Orínshwí-rẹ-íńtọ́", "ipa": "[ōrĩ́ɸí-rɛ̄-ĩ́tɔ́]", "english": "One hundred forty-five", "pos": "n", "category": "Other"}, {"uro": "Orínshwí-rẹ-íro", "ipa": "[ōrĩ́ɸí-rɛ̄-írō]", "english": "One hundred forty-eight", "pos": "n", "category": "Other"}, {"uro": "Orínshwí-rẹ-íshwí", "ipa": "[ōrĩ́ɸí-rɛ̄-íɸí]", "english": "One hundred forty-seven", "pos": "n", "category": "Other"}, {"uro": "Orínshwí-rẹ-ìyí", "ipa": "[ōrĩ́ɸí-rɛ̄-ìjí]", "english": "One hundred forty-two", "pos": "n", "category": "Other"}, {"uro": "Orínshwí-rẹ-ọ̀lọ̀", "ipa": "[ōrĩ́ɸí-rɛ̄-ɔ̀lɔ̀]", "english": "One hundred forty-one", "pos": "n", "category": "Other"}, {"uro": "Oríntọ̀", "ipa": "[ōrĩ́tɔ̀]", "english": "One hundred", "pos": "n", "category": "Other"}, {"uro": "Oríntọ̀-rẹ-ìda", "ipa": "[ōrĩ́tɔ̀-rɛ̄-ìdā]", "english": "One hundred three", "pos": "n", "category": "Other"}, {"uro": "Oríntọ̀-rẹ-ìfà", "ipa": "[ōrĩ́tɔ̀-rɛ̄-ìfà]", "english": "One hundred six", "pos": "n", "category": "Other"}, {"uro": "Oríntọ̀-rẹ-íńdá", "ipa": "[ōrĩ́tɔ̀-rɛ̄-ĩ́dá]", "english": "One hundred nine", "pos": "n", "category": "Other"}, {"uro": "Oríntọ̀-rẹ-inẹ́", "ipa": "[ōrĩ́tɔ̀-rɛ̄-īnɛ́]", "english": "One hundred four", "pos": "n", "category": "Other"}, {"uro": "Oríntọ̀-rẹ-íńtọ́", "ipa": "[ōrĩ́tɔ̀-rɛ̄-ĩ́tɔ́]", "english": "One hundred five", "pos": "n", "category": "Other"}, {"uro": "Oríntọ̀-rẹ-íro", "ipa": "[ōrĩ́tɔ̀-rɛ̄-írō]", "english": "One hundred eight", "pos": "n", "category": "Other"}, {"uro": "Oríntọ̀-rẹ-íshwí", "ipa": "[ōrĩ́tɔ̀-rɛ̄-íɸí]", "english": "One hundred seven", "pos": "n", "category": "Other"}, {"uro": "Oríntọ̀-rẹ-ìyí", "ipa": "[ōrĩ́tɔ̀-rɛ̄-ìjí]", "english": "One hundred two", "pos": "n", "category": "Other"}, {"uro": "Oríntọ̀-rẹ-ọ̀lọ̀", "ipa": "[ōrĩ́tɔ̀-rɛ̄-ɔ̀lɔ̀]", "english": "One hundred one", "pos": "n", "category": "Other"}, {"uro": "Orínyè", "ipa": "[ōrĩ́jè]", "english": "Two hundred", "pos": "n", "category": "Other"}, {"uro": "Orìnyí", "ipa": "[ōrĩ̀jí]", "english": "Forty", "pos": "n", "category": "Other"}, {"uro": "Orìnyí-rẹ-ìda", "ipa": "[ōrĩ̀jí-rɛ̄-ìdā]", "english": "Forty-three", "pos": "n", "category": "Other"}, {"uro": "Orìnyí-rẹ-ìfà", "ipa": "[ōrĩ̀jí-rɛ̄-ìfà]", "english": "Forty-six", "pos": "n", "category": "Other"}, {"uro": "Orìnyí-rẹ-íńdá", "ipa": "[ōrĩ̀jí-rɛ̄-ĩ́dá]", "english": "Forty-nine", "pos": "n", "category": "Other"}, {"uro": "Orìnyí-rẹ-inẹ́", "ipa": "[ōrĩ̀jí-rɛ̄-īnɛ́]", "english": "Forty-four", "pos": "n", "category": "Other"}, {"uro": "Orìnyí-rẹ-íńtọ́", "ipa": "[ōrĩ̀jí-rɛ̄-ĩ́tɔ́]", "english": "Forty-five", "pos": "n", "category": "Other"}, {"uro": "Orìnyí-rẹ-íro", "ipa": "[ōrĩ̀jí-rɛ̄-írō]", "english": "Forty-eight", "pos": "n", "category": "Other"}, {"uro": "Orìnyí-rẹ-íshwí", "ipa": "[ōrĩ̀jí-rɛ̄-íɸí]", "english": "Forty-seven", "pos": "n", "category": "Other"}, {"uro": "Orìnyí-rẹ-ìyí", "ipa": "[ōrĩ̀jí-rɛ̄-ìjí]", "english": "Forty-two", "pos": "n", "category": "Other"}, {"uro": "Orìnyí-rẹ-ọ̀lọ̀", "ipa": "[ōrĩ̀jí-rɛ̄-ɔ̀lɔ̀]", "english": "Forty-one", "pos": "n", "category": "Other"}, {"uro": "Oró", "ipa": "[ōró]", "english": "Venom (of snake)", "pos": "n", "category": "Animals"}, {"uro": "Òrófó", "ipa": "[òrófó]", "english": "Parrot", "pos": "n", "category": "Other"}, {"uro": "Orúgọ", "ipa": "[ōru᷈́gɔ̄]", "english": "Dawn (before sunrise)", "pos": "n", "category": "Other"}, {"uro": "Orúgọ", "ipa": "[ōru᷈́gɔ̄]", "english": "Morning", "pos": "n", "category": "Other"}, {"uro": "Òrùn", "ipa": "[òrũ̀]", "english": "Palmtree", "pos": "n", "category": "Other"}, {"uro": "Òrùn àkan", "ipa": "[òrũ̀ àkã̄]", "english": "Beak, bill", "pos": "n", "category": "Other"}, {"uro": "Orunye̩", "ipa": "[ōrũ̄jē]", "english": "Four Hundred", "pos": "n", "category": "Other"}, {"uro": "Osinsí", "ipa": "[ōsĩ̄sí]", "english": "Darkness", "pos": "n", "category": "Other"}, {"uro": "Òsun", "ipa": "[òsũ̄]", "english": "Back", "pos": "n", "category": "Other"}, {"uro": "Ótó", "ipa": "[ótó]", "english": "Edge (n)", "pos": "n", "category": "Other"}, {"uro": "Ótóji", "ipa": "[ótód͡ʒī]", "english": "River bank", "pos": "n", "category": "Other"}, {"uro": "Òtuùla", "ipa": "[òtūùlā]", "english": "Day after tomorrow", "pos": "n", "category": "Other"}, {"uro": "Oùnkùn", "ipa": "[ōũ̀kũ̀]", "english": "Rope", "pos": "n", "category": "Other"}, {"uro": "Òvò", "ipa": "[òvò]", "english": "Dew", "pos": "n", "category": "Other"}, {"uro": "Òwìwí", "ipa": "[òwìwí]", "english": "Owl", "pos": "n", "category": "Other"}, {"uro": "Ówọ́", "ipa": "[ówɔ́]", "english": "Bush", "pos": "n", "category": "Other"}, {"uro": "Òwú", "ipa": "[òwú]", "english": "Thread", "pos": "n", "category": "Other"}, {"uro": "Ọ̀bọ", "ipa": "[ɔ̀bɔ̄]", "english": "Monkey", "pos": "n", "category": "Other"}, {"uro": "Ọ́chọ́chọ́ ẹsẹ̀yọ̀", "ipa": "[ɔ́t͡ʃɔ́t͡ʃɔ́ ɛ̄sɛ̀jɔ̀]", "english": "Red pepper, hot pepper", "pos": "adj", "category": "Other"}, {"uro": "Ọ̀fọ̀", "ipa": "[ɔ̀fɔ̀]", "english": "Mourning", "pos": "n", "category": "Other"}, {"uro": "Ọfọ́ẹyẹ̀", "ipa": "[ɔ̄fɔ́ɛ̄jɛ̀]", "english": "Slither (snake)", "pos": "n", "category": "Animals"}, {"uro": "Ọ̀gbọ̀rọ̀dọ̀", "ipa": "[ɔ̀g͡bɔ̀rɔ̀dɔ̀]", "english": "Cassava, manioc", "pos": "n", "category": "Family"}, {"uro": "Ọ̀gbọ̀rọ̀dọ̀", "ipa": "[ɔ̀g͡bɔ̀rɔ̀dɔ̀]", "english": "Cassava", "pos": "n", "category": "Other"}, {"uro": "Ọ̀gẹ̀dẹ̀", "ipa": "[ɔ̀gɛ̀dɛ̀]", "english": "Banana", "pos": "n", "category": "Other"}, {"uro": "Ọ̀gẹ̀dẹ̀ ńbó", "ipa": "[ɔ̀gɛ̀dɛ̀ ńbó]", "english": "Pineapple", "pos": "n", "category": "Other"}, {"uro": "Ọgọgọ́", "ipa": "[ɔ̄gɔ̄gɔ́]", "english": "Tortoise (land)", "pos": "n", "category": "Other"}, {"uro": "Ọhiọ", "ipa": "[ɔ̄hīɔ̄]", "english": "Guest (stranger)", "pos": "n", "category": "Other"}, {"uro": "Ọ́jọ", "ipa": "[ɔ́d͡ʒɔ̄]", "english": "Guest, visitor", "pos": "n", "category": "Other"}, {"uro": "Ọká", "ipa": "[ɔ̄ká]", "english": "Spitting cobra", "pos": "n", "category": "Other"}, {"uro": "Ọ̀kẹ́rẹ́", "ipa": "[ɔ̀kɛ́rɛ́]", "english": "Squirrel", "pos": "n", "category": "Other"}, {"uro": "Ọ́kọ́ àran", "ipa": "[ɔ́kɔ́ àrã̄]", "english": "He-goat, billy goat", "pos": "n", "category": "Animals"}, {"uro": "Ọ́kọ́ ẹ̀hẹ", "ipa": "[ɔ́kɔ́ ɛ̀hɛ̄]", "english": "Hen", "pos": "n", "category": "Other"}, {"uro": "Ọ́kọ́ ẹ̀lẹdẹ̀", "ipa": "[ɔ́kɔ́ ɛ̀lɛ̄dɛ̀]", "english": "Boar (male pig)", "pos": "n", "category": "Animals"}, {"uro": "Ọ́kọ màlùú", "ipa": "[ɔ́kɔ̄ màlùú]", "english": "Bull", "pos": "n", "category": "Other"}, {"uro": "Ọ̀kpá", "ipa": "[ɔ̀k͡pá]", "english": "Stick", "pos": "n", "category": "Other"}, {"uro": "Ọ́kpọ̀lọ̀", "ipa": "[ɔ́k͡pɔ̀lɔ̀]", "english": "Frog", "pos": "n", "category": "Other"}, {"uro": "Ọkpọ́lọ", "ipa": "[ɔ̄k͡pɔ́lɔ̄]", "english": "Brain", "pos": "n", "category": "Nature"}, {"uro": "Ọ́kwọ", "ipa": "[ɔ́kʷɔ̄]", "english": "Man (male)", "pos": "n", "category": "Family"}, {"uro": "Ọ́kwọ́ ẹhẹ", "ipa": "[ɔ́kʷɔ́ ɛ̄hɛ̄]", "english": "Cock", "pos": "n", "category": "Other"}, {"uro": "Ọ̀lẹ", "ipa": "[ɔ̀lɛ̄]", "english": "(be) lazy", "pos": "v", "category": "Other"}, {"uro": "Ọ̀lọ̀", "ipa": "[ɔ̀lɔ̀]", "english": "One", "pos": "n", "category": "Other"}, {"uro": "Ọ̀lọ̀lọ̀nọ̀", "ipa": "[ɔ̀lɔ̀lɔ̀nɔ̀]", "english": "(be) same", "pos": "v", "category": "Other"}, {"uro": "Ọlongbo", "ipa": "[ɔ̄lōng͡bō]", "english": "Pap", "pos": "n", "category": "Other"}, {"uro": "Ọma", "ipa": "[ɔ̄mā]", "english": "Clay", "pos": "n", "category": "Other"}, {"uro": "Ọ́mọ́n", "ipa": "[ɔ́mɔ̃́]", "english": "Mosquito", "pos": "n", "category": "Other"}, {"uro": "Ọmọnlúlé", "ipa": "[ɔ̄mɔ̃̄lúlé]", "english": "Gecko", "pos": "n", "category": "Other"}, {"uro": "Ọ̀m̀pọ̀", "ipa": "[ɔ̀m̀pɔ̀]", "english": "(be) dirty", "pos": "v", "category": "Other"}, {"uro": "Ọ̀ǹbọ̀", "ipa": "[ɔ̀ǹbɔ̀]", "english": "Coward", "pos": "n", "category": "Animals"}, {"uro": "Ọ́ńgbà", "ipa": "[ɔ̃́ŋ́͡mg͡bà]", "english": "Thirty", "pos": "n", "category": "Other"}, {"uro": "Ọ́ńgbà-rẹ-ìda", "ipa": "[ɔ̃́ŋ́͡mg͡bà-rɛ̄-ìdā]", "english": "Thirty-three", "pos": "n", "category": "Other"}, {"uro": "Ọ́ńgbà-rẹ-ìfà", "ipa": "[ɔ̃́ŋ́͡mg͡bà-rɛ̄-ìfà]", "english": "Thirty-six", "pos": "n", "category": "Other"}, {"uro": "Ọ́ńgbà-rẹ-íńdá", "ipa": "[ɔ̃́ŋ́͡mg͡bà-rɛ̄-ĩ́dá]", "english": "Thirty-nine", "pos": "n", "category": "Other"}, {"uro": "Ọ́ńgbà-rẹ-inẹ́", "ipa": "[ɔ̃́ŋ́͡mg͡bà-rɛ̄-īnɛ́]", "english": "Thirty-four", "pos": "n", "category": "Other"}, {"uro": "Ọ́ńgbà-rẹ-íńtọ́", "ipa": "[ɔ̃́ŋ́͡mg͡bà-rɛ̄-ĩ́tɔ́]", "english": "Thirty-five", "pos": "n", "category": "Other"}, {"uro": "Ọ́ńgbà-rẹ-íro", "ipa": "[ɔ̃́ŋ́͡mg͡bà-rɛ̄-írō]", "english": "Thirty-eight", "pos": "n", "category": "Other"}, {"uro": "Ọ́ńgbà-rẹ-íshwí", "ipa": "[ɔ̃́ŋ́͡mg͡bà-rɛ̄-íɸí]", "english": "Thirty-seven", "pos": "n", "category": "Other"}, {"uro": "Ọ́ńgbà-rẹ-ìyí", "ipa": "[ɔ̃́ŋ́͡mg͡bà-rɛ̄-ìjí]", "english": "Thirty-two", "pos": "n", "category": "Other"}, {"uro": "Ọ́ńgbà-rẹ-ọ̀lọ̀", "ipa": "[ɔ̃́ŋ́͡mg͡bà-rɛ̄-ɔ̀lɔ̀]", "english": "Thirty-one", "pos": "n", "category": "Other"}, {"uro": "Ọngbọ ngbọ́", "ipa": "[ɔ̄ŋmgbɔ̄ ŋmgbɔ́]", "english": "Time", "pos": "n", "category": "Other"}, {"uro": "Ọngọ", "ipa": "[ɔ̃̄gɔ̄]", "english": "Tree", "pos": "n", "category": "Other"}, {"uro": "Ọ́ńgọ", "ipa": "[ɔ́ŋ́gɔ̄]", "english": "Firewood", "pos": "n", "category": "Other"}, {"uro": "Ọngọ àsẹ̀ẹ́sọ́", "ipa": "[ɔ̃̄gɔ̄ àsɛ̀ɛ́sɔ́]", "english": "Fire Wood", "pos": "n", "category": "Other"}, {"uro": "Ọngọ-kúrù", "ipa": "[ɔ̃̄gɔ̄-kúrù]", "english": "Coconut palm", "pos": "n", "category": "Other"}, {"uro": "Ọngọ-òhú", "ipa": "[ɔ̃̄gɔ̄-òhú]", "english": "Silk-cotton tree, kapok tree", "pos": "n", "category": "Other"}, {"uro": "Ọngọ́wọ́n", "ipa": "[ɔ̃̄ɡɔ́wɔ̃́]", "english": "Bridge (of nose)", "pos": "n", "category": "Body Parts"}, {"uro": "Ọ̀nìn", "ipa": "[ɔ̀nĩ̀]", "english": "Crocodile", "pos": "n", "category": "Other"}, {"uro": "Ọparun", "ipa": "[ɔ̄pārũ̄]", "english": "Bamboo", "pos": "n", "category": "Other"}, {"uro": "Ọran", "ipa": "[ɔ̄rã̄]", "english": "You (masc., sing.)", "pos": "n", "category": "Other"}, {"uro": "Ọrànhò", "ipa": "[ɔ̄rã̀hò]", "english": "Toe", "pos": "n", "category": "Other"}, {"uro": "Ọránvọ́", "ipa": "[ɔ̄rã́vɔ́]", "english": "Thumb", "pos": "n", "category": "Other"}, {"uro": "Ọ́rọ", "ipa": "[ɔ́rɔ̄]", "english": "Palm kernel", "pos": "n", "category": "Other"}, {"uro": "Ọ́yọ́n", "ipa": "[ɔ́jɔ̃́]", "english": "(be) shy", "pos": "v", "category": "Other"}, {"uro": "Pà", "ipa": "[pà]", "english": "Vomit (v)", "pos": "v", "category": "Other"}, {"uro": "Páan", "ipa": "[páã̄]", "english": "Plait (hair)", "pos": "n", "category": "Other"}, {"uro": "Pàínṣín", "ipa": "[pàĩ́ʃĩ́]", "english": "Peck", "pos": "v", "category": "Other"}, {"uro": "Pẹ́", "ipa": "[pɛ́]", "english": "Burst", "pos": "v", "category": "Other"}, {"uro": "Pẹ́ju", "ipa": "[pɛ́d͡ʒū]", "english": "Bite (snake)", "pos": "v", "category": "Animals"}, {"uro": "Pẹju", "ipa": "[pɛ̄d͡ʒū]", "english": "Bite (v)", "pos": "v", "category": "Other"}, {"uro": "Pẹ̀n", "ipa": "[pɛ̃̀]", "english": "(be) long", "pos": "v", "category": "Other"}, {"uro": "Pẹ̀n", "ipa": "[pɛ̃̀]", "english": "Lengthen", "pos": "v", "category": "Other"}, {"uro": "Pẹn", "ipa": "[pɛ̃̄]", "english": "(be) straight", "pos": "v", "category": "Other"}, {"uro": "Pirì", "ipa": "[pīrì]", "english": "(be) small", "pos": "v", "category": "Other"}, {"uro": "Pọ", "ipa": "[pɔ̄]", "english": "Slide", "pos": "v", "category": "Other"}, {"uro": "Pọn", "ipa": "[pɔ̃̄]", "english": "(be) slippery", "pos": "v", "category": "Other"}, {"uro": "Pòṣé", "ipa": "[pòʃé]", "english": "Hiss", "pos": "v", "category": "Other"}, {"uro": "Pọ́tú", "ipa": "[pɔ́tú]", "english": "Subtract, take away", "pos": "v", "category": "Other"}, {"uro": "Pun", "ipa": "[pũ̄]", "english": "Abuse", "pos": "n", "category": "Other"}, {"uro": "Púwan", "ipa": "[púwã̄]", "english": "Hatch", "pos": "v", "category": "Other"}, {"uro": "Phée", "ipa": "[ɸéē]", "english": "Call (summon)", "pos": "v", "category": "Other"}, {"uro": "Phé̩e̩", "ipa": "[ɸéē]", "english": "Get (obtain)", "pos": "n", "category": "Other"}, {"uro": "Phẹphe", "ipa": "[ɸɛ̄ɸē]", "english": "Enter", "pos": "v", "category": "Other"}, {"uro": "Phín", "ipa": "[ɸĩ́]", "english": "Fry", "pos": "n", "category": "Other"}, {"uro": "Phọ́", "ipa": "[ɸɔ́]", "english": "(be) ripe", "pos": "v", "category": "Other"}, {"uro": "Phọ", "ipa": "[ɸɔ̄]", "english": "Find", "pos": "v", "category": "Other"}, {"uro": "Ra", "ipa": "[rā]", "english": "(be) lost", "pos": "v", "category": "Other"}, {"uro": "Ra", "ipa": "[rā]", "english": "Spread (disease, fire)", "pos": "v", "category": "Other"}, {"uro": "Ra/díra", "ipa": "[rā]", "english": "Lose (some Thing)", "pos": "n", "category": "Other"}, {"uro": "Raà", "ipa": "[rāà]", "english": "Plant (tuber)", "pos": "v", "category": "Other"}, {"uro": "Radidọwẹ́", "ipa": "[rādīdɔ̄wɛ́]", "english": "Fail", "pos": "v", "category": "Other"}, {"uro": "Ràkúnmín", "ipa": "[ràkṹmĩ́]", "english": "Camel", "pos": "n", "category": "Other"}, {"uro": "Ran", "ipa": "[rã̄]", "english": "Near", "pos": "n", "category": "Other"}, {"uro": "Ràn", "ipa": "[rã̀]", "english": "Feel (passive)", "pos": "v", "category": "Other"}, {"uro": "Ràn", "ipa": "[rã̀]", "english": "Know", "pos": "n", "category": "Other"}, {"uro": "Ranhọ", "ipa": "[rã̄hɔ̄]", "english": "Cooking", "pos": "n", "category": "Other"}, {"uro": "Ré", "ipa": "[ré]", "english": "(be) scarce", "pos": "v", "category": "Other"}, {"uro": "Ré", "ipa": "[ré]", "english": "(be)expensive", "pos": "n", "category": "Other"}, {"uro": "Rẹ̀ (váàgọ́)", "ipa": "[rɛ̀ (váàgɔ́)]", "english": "(be) soft", "pos": "v", "category": "Other"}, {"uro": "Ré, ngwọ", "ipa": "[ré, ŋgʷɔ̄]", "english": "(be) abundant", "pos": "v", "category": "Other"}, {"uro": "Rẹ̀ji", "ipa": "[rɛ̀d͡ʒī]", "english": "(be) slow", "pos": "v", "category": "Other"}, {"uro": "Revọ̀", "ipa": "[rēvɔ̀]", "english": "Whistle (v)", "pos": "v", "category": "Other"}, {"uro": "Rẹ̀wẹ̀yèhẹ̀n", "ipa": "[rɛ̀wɛ̀jèhɛ̃̀]", "english": "Whisper (v)", "pos": "v", "category": "Other"}, {"uro": "Rì", "ipa": "[rì]", "english": "Sink", "pos": "v", "category": "Other"}, {"uro": "Rírì", "ipa": "[rírì]", "english": "Value", "pos": "n", "category": "Other"}, {"uro": "Ró", "ipa": "[ró]", "english": "Blow (horn)", "pos": "v", "category": "Other"}, {"uro": "Rò", "ipa": "[rò]", "english": "(be) bitter", "pos": "v", "category": "Other"}, {"uro": "Rọ̀", "ipa": "[rɔ̀]", "english": "Trample", "pos": "v", "category": "Animals"}, {"uro": "Rọ", "ipa": "[rɔ̄]", "english": "Wither (plant)", "pos": "v", "category": "Other"}, {"uro": "Ró yùn", "ipa": "[ró jũ̀]", "english": "Sharpen (knife)", "pos": "v", "category": "Other"}, {"uro": "Róbótó", "ipa": "[róbótó]", "english": "(be) round", "pos": "v", "category": "Other"}, {"uro": "Rógọ́", "ipa": "[rógɔ́]", "english": "Harden", "pos": "v", "category": "Other"}, {"uro": "Rohó", "ipa": "[rōhó]", "english": "Fear", "pos": "n", "category": "Other"}, {"uro": "Rómàji", "ipa": "[rómàd͡ʒī]", "english": "Steer (v)", "pos": "v", "category": "Other"}, {"uro": "Rọ́mìn", "ipa": "[rɔ́mĩ̀]", "english": "Swallow", "pos": "v", "category": "Other"}, {"uro": "Róntá", "ipa": "[róntá]", "english": "Diminish", "pos": "v", "category": "Other"}, {"uro": "Róo", "ipa": "[róō]", "english": "Grind", "pos": "v", "category": "Other"}, {"uro": "Ró̩o̩", "ipa": "[róō]", "english": "Weave (clothes)", "pos": "n", "category": "Other"}, {"uro": "Rọ́tó", "ipa": "[rɔ́tó]", "english": "Listen", "pos": "v", "category": "Other"}, {"uro": "Run", "ipa": "[rũ̄]", "english": "Stink, smell (bad)", "pos": "n", "category": "Other"}, {"uro": "Rùn", "ipa": "[rũ̀]", "english": "Stink", "pos": "n", "category": "Other"}, {"uro": "Sàmán sín", "ipa": "[sàmã́ sĩ́]", "english": "Bend down, stoop", "pos": "v", "category": "Other"}, {"uro": "Samán sín", "ipa": "[sāmã́ sĩ́]", "english": "Squat", "pos": "n", "category": "Other"}, {"uro": "San", "ipa": "[sã̄]", "english": "Quality", "pos": "n", "category": "Other"}, {"uro": "San", "ipa": "[sã̄]", "english": "(be) good", "pos": "v", "category": "Other"}, {"uro": "San", "ipa": "[sã̄]", "english": "(be) beautiful", "pos": "v", "category": "Other"}, {"uro": "Sé tìtọ́", "ipa": "[sé tìtɔ́]", "english": "Really, truly", "pos": "n", "category": "Other"}, {"uro": "S̩e̩ẹ", "ipa": "[sēɛ̄]", "english": "Sew", "pos": "n", "category": "Other"}, {"uro": "Sẹ̀n", "ipa": "[sɛ̃̀]", "english": "Walk", "pos": "v", "category": "Other"}, {"uro": "Sẹn", "ipa": "[sɛ̃̄]", "english": "Sleep (v)", "pos": "v", "category": "Other"}, {"uro": "Sẹ̀rẹ̀n", "ipa": "[sɛ̀rɛ̃̀]", "english": "(be) different", "pos": "v", "category": "Other"}, {"uro": "Séri", "ipa": "[sérī]", "english": "Pierce", "pos": "n", "category": "Other"}, {"uro": "Sẹ̀sìgá", "ipa": "[sɛ̀sìgá]", "english": "Travel", "pos": "v", "category": "Other"}, {"uro": "Shẹn wẹnṣì", "ipa": "[shɛ̃̄ wɛ̃̄ʃì]", "english": "Lie (down)", "pos": "n", "category": "Other"}, {"uro": "Shó̩ọ", "ipa": "[shóɔ̄]", "english": "Look for", "pos": "v", "category": "Other"}, {"uro": "Si", "ipa": "[sī]", "english": "Lay (eggs)", "pos": "v", "category": "Food & Farm"}, {"uro": "Si ìyò", "ipa": "[sī ìjò]", "english": "(be) alive", "pos": "v", "category": "Other"}, {"uro": "Sii", "ipa": "[sīī]", "english": "Pour", "pos": "v", "category": "Other"}, {"uro": "Sìn", "ipa": "[sĩ̀]", "english": "Sneeze (v)", "pos": "v", "category": "Other"}, {"uro": "Sín", "ipa": "[sĩ́]", "english": "Break wind, fart", "pos": "v", "category": "Nature"}, {"uro": "Sìn", "ipa": "[sĩ̀]", "english": "(be) silent", "pos": "v", "category": "Other"}, {"uro": "S̩in", "ipa": "[sĩ̄]", "english": "Extinguish (tr.)", "pos": "n", "category": "Other"}, {"uro": "Sirí", "ipa": "[sīrí]", "english": "Turn round (intr)", "pos": "v", "category": "Other"}, {"uro": "Sírin ùlẹ̀", "ipa": "[sírĩ̄ ùlɛ̀]", "english": "Beard", "pos": "n", "category": "Other"}, {"uro": "Sọ̀", "ipa": "[sɔ̀]", "english": "Descend, go down", "pos": "v", "category": "Other"}, {"uro": "Sọ́", "ipa": "[sɔ᷈́]", "english": "Roll", "pos": "v", "category": "Other"}, {"uro": "Sọ gbòrù", "ipa": "[sɔ̄ g͡bòrù]", "english": "Widen", "pos": "v", "category": "Other"}, {"uro": "Sọ wé̩ńshi", "ipa": "[sɔ̄ wénshī]", "english": "Descend", "pos": "v", "category": "Other"}, {"uro": "Sọnúrẹ̀", "ipa": "[sɔ̄núrɛ̀]", "english": "Soften", "pos": "v", "category": "Other"}, {"uro": "Ṣa", "ipa": "[ʃā]", "english": "Lower (tr)", "pos": "v", "category": "Other"}, {"uro": "Ṣan", "ipa": "[ʃã̄]", "english": "Melt (intr)", "pos": "v", "category": "Other"}, {"uro": "Ṣàn", "ipa": "[ʃã̀]", "english": "Begin", "pos": "v", "category": "Other"}, {"uro": "Ṣàn áake", "ipa": "[ʃã̀ áākē]", "english": "Continue, resume", "pos": "v", "category": "Other"}, {"uro": "Ṣásọ́", "ipa": "[ʃásɔ́]", "english": "Spark", "pos": "n", "category": "Other"}, {"uro": "Ṣẹnwẹ́nṣín", "ipa": "[ʃɛ̃̄wɛ̃́ʃĩ́]", "english": "(be) lying down", "pos": "v", "category": "Other"}, {"uro": "Ṣeṣíwẹ́", "ipa": "[ʃēʃíwɛ́]", "english": "(be) seated", "pos": "v", "category": "Other"}, {"uro": "Ṣevóò", "ipa": "[ʃēvóò]", "english": "Pay (for goods,services, etc.)", "pos": "v", "category": "Other"}, {"uro": "Ṣẹwẹ́ṣín", "ipa": "[ʃɛ̄wɛ́ʃĩ́]", "english": "Lie down", "pos": "n", "category": "Other"}, {"uro": "Ṣí", "ipa": "[ʃí]", "english": "Run", "pos": "v", "category": "Other"}, {"uro": "Ṣí", "ipa": "[ʃí]", "english": "Flee, run away from", "pos": "v", "category": "Other"}, {"uro": "Ṣimẹ̀", "ipa": "[ʃīmɛ̀]", "english": "Payment", "pos": "n", "category": "Other"}, {"uro": "Ṣin", "ipa": "[ʃĩ̄]", "english": "Quench, extinguish", "pos": "v", "category": "Other"}, {"uro": "Ṣíshívè", "ipa": "[ʃíshívè]", "english": "Surpass", "pos": "n", "category": "Other"}, {"uro": "Ṣọ̀run", "ipa": "[ʃɔ̀rũ̄]", "english": "Smell (v)", "pos": "v", "category": "Other"}, {"uro": "Shwẹ", "ipa": "[ɸɛ̄]", "english": "Enter, go in", "pos": "v", "category": "Other"}, {"uro": "Shwẹ̀", "ipa": "[ɸɛ̀]", "english": "Take", "pos": "v", "category": "Other"}, {"uro": "Shwẹ́vá", "ipa": "[ɸɛ́vá]", "english": "Bring", "pos": "v", "category": "Other"}, {"uro": "Shwevó", "ipa": "[ɸēvó]", "english": "(be)rich", "pos": "n", "category": "Other"}, {"uro": "Shweyi", "ipa": "[ɸējī]", "english": "Take Off", "pos": "v", "category": "Other"}, {"uro": "Shwe̩yi", "ipa": "[ɸējī]", "english": "Stand (up)", "pos": "n", "category": "Other"}, {"uro": "Shwi/Shuwan", "ipa": "[ɸī]", "english": "Give Birth", "pos": "v", "category": "Other"}, {"uro": "Shwìgẹ̀", "ipa": "[ɸìgɛ̀]", "english": "(be) courageous, (be) brave", "pos": "v", "category": "Other"}, {"uro": "Shwìn", "ipa": "[ɸĩ̀]", "english": "(be) hot (objects)", "pos": "v", "category": "Other"}, {"uro": "Shwìn", "ipa": "[ɸĩ̀]", "english": "(be) wicked", "pos": "v", "category": "Other"}, {"uro": "Shwo", "ipa": "[ɸō]", "english": "(be) rotten", "pos": "v", "category": "Other"}, {"uro": "Ta", "ipa": "[tā]", "english": "Jump (v)", "pos": "v", "category": "Other"}, {"uro": "Tá", "ipa": "[tá]", "english": "Sting (v)", "pos": "v", "category": "Other"}, {"uro": "Tá", "ipa": "[tá]", "english": "Finish, complete (v)", "pos": "v", "category": "Other"}, {"uro": "Ta yìgìdì", "ipa": "[tā jìgìdì]", "english": "Jump up", "pos": "v", "category": "Other"}, {"uro": "Tàá", "ipa": "[tàá]", "english": "Soak (seed in Holes)", "pos": "n", "category": "Other"}, {"uro": "Tàma", "ipa": "[tàmā]", "english": "Stamp (with foot)", "pos": "v", "category": "Body Parts"}, {"uro": "Tàngélé", "ipa": "[tã̀gélé]", "english": "Limp", "pos": "v", "category": "Other"}, {"uro": "Tàràádí", "ipa": "[tàràádí]", "english": "(be) first", "pos": "v", "category": "Other"}, {"uro": "Ti", "ipa": "[tī]", "english": "Push", "pos": "v", "category": "Other"}, {"uro": "Tinrin", "ipa": "[tĩ̄rĩ̄]", "english": "(be) thin", "pos": "v", "category": "Other"}, {"uro": "Tírín", "ipa": "[tírĩ́]", "english": "(be) thin", "pos": "v", "category": "Other"}, {"uro": "To", "ipa": "[tō]", "english": "Arrange", "pos": "v", "category": "Other"}, {"uro": "Tọ", "ipa": "[tɔ̄]", "english": "Urinate", "pos": "v", "category": "Other"}, {"uro": "Tòlótòló", "ipa": "[tòlótòló]", "english": "Turkey", "pos": "n", "category": "Other"}, {"uro": "Tun", "ipa": "[tũ̄]", "english": "(be) wet", "pos": "v", "category": "Other"}, {"uro": "Tun", "ipa": "[tũ̄]", "english": "(be) cold (objects)", "pos": "v", "category": "Other"}, {"uro": "Tun", "ipa": "[tũ̄]", "english": "Cool", "pos": "n", "category": "Other"}, {"uro": "Tútẹ́", "ipa": "[tútɛ́]", "english": "Spit", "pos": "v", "category": "Other"}, {"uro": "Úchẹ̀", "ipa": "[útʃɛ̀]", "english": "Neck", "pos": "n", "category": "Other"}, {"uro": "Uchẹ úvọ́", "ipa": "[ūtʃɛ̄ úvɔ́]", "english": "Wrist", "pos": "n", "category": "Other"}, {"uro": "Uchẹhò", "ipa": "[ūtʃɛ̄hò]", "english": "Ankle", "pos": "n", "category": "Other"}, {"uro": "Úchúrẹn", "ipa": "[útʃúrɛ̃̄]", "english": "Marriage (state of wedlock)", "pos": "n", "category": "Other"}, {"uro": "Úchúrẹn", "ipa": "[útʃúrɛ̃̄]", "english": "Bride", "pos": "n", "category": "Family"}, {"uro": "Ugbà", "ipa": "[ūgbà]", "english": "Mountain", "pos": "n", "category": "Other"}, {"uro": "Úgbà", "ipa": "[úgbà]", "english": "Up", "pos": "n", "category": "Other"}, {"uro": "Ugbárí", "ipa": "[ūg͡bárí]", "english": "Wall (of House)", "pos": "n", "category": "Places"}, {"uro": "Ùgbọrọ̀", "ipa": "[ùg͡bɔ̄rɔ̀]", "english": "Twenty", "pos": "n", "category": "Other"}, {"uro": "Ugbọrọ-rẹ-ìda", "ipa": "[ūg͡bɔ̄rɔ̄-rɛ̄-ìdā]", "english": "Twenty-three", "pos": "n", "category": "Other"}, {"uro": "Ugbọrọ-rẹ-ìfà", "ipa": "[ūg͡bɔ̄rɔ̄-rɛ̄-ìfà]", "english": "Twenty-six", "pos": "n", "category": "Other"}, {"uro": "Ugbọrọ-rẹ-íńdá", "ipa": "[ūg͡bɔ̄rɔ̄-rɛ̄-ĩ́dá]", "english": "Twenty-nine", "pos": "n", "category": "Other"}, {"uro": "Ugbọrọ-rẹ-inẹ́", "ipa": "[ūg͡bɔ̄rɔ̄-rɛ̄-īnɛ́]", "english": "Twenty-four", "pos": "n", "category": "Other"}, {"uro": "Ugbọrọ-rẹ-íńtọ́", "ipa": "[ūg͡bɔ̄rɔ̄-rɛ̄-ĩ́tɔ́]", "english": "Twenty-five", "pos": "n", "category": "Other"}, {"uro": "Ugbọrọ-rẹ-íro", "ipa": "[ūg͡bɔ̄rɔ̄-rɛ̄-írō]", "english": "Twenty-eight", "pos": "n", "category": "Other"}, {"uro": "Ugbọrọ-rẹ-íshwí", "ipa": "[ūg͡bɔ̄rɔ̄-rɛ̄-íɸí]", "english": "Twenty-seven", "pos": "n", "category": "Other"}, {"uro": "Ugbọrọ-rẹ-ìyí", "ipa": "[ūg͡bɔ̄rɔ̄-rɛ̄-ìjí]", "english": "Twenty-two", "pos": "n", "category": "Other"}, {"uro": "Ugbọrọ-rẹ-ọ̀lọ̀", "ipa": "[ūg͡bɔ̄rɔ̄-rɛ̄-ɔ̀lɔ̀]", "english": "Twenty-one", "pos": "n", "category": "Other"}, {"uro": "Ugọ", "ipa": "[ūgɔ̄]", "english": "Oil", "pos": "n", "category": "Other"}, {"uro": "Úgú", "ipa": "[úgú]", "english": "Rival", "pos": "n", "category": "Other"}, {"uro": "Úgú", "ipa": "[úgú]", "english": "Vulture", "pos": "n", "category": "Other"}, {"uro": "Úgwú", "ipa": "[úgʷú]", "english": "Fellow-wife", "pos": "n", "category": "Other"}, {"uro": "Úgwúran", "ipa": "[úgʷúrã̄]", "english": "Co-wife", "pos": "n", "category": "Other"}, {"uro": "Uhẹ", "ipa": "[ūhɛ̄]", "english": "Fat", "pos": "adj", "category": "Other"}, {"uro": "Ùhò", "ipa": "[ùhò]", "english": "Leg", "pos": "n", "category": "Other"}, {"uro": "Uhọ", "ipa": "[ūhɔ̄]", "english": "Sun", "pos": "n", "category": "Other"}, {"uro": "Ùhọ̀róla", "ipa": "[ùhɔ̀rólā]", "english": "Sunshine", "pos": "n", "category": "Body Parts"}, {"uro": "Ùji", "ipa": "[ùd͡ʒī]", "english": "Water", "pos": "n", "category": "Other"}, {"uro": "Ùkẹnẹ", "ipa": "[ùkɛ̄nɛ̄]", "english": "Needle", "pos": "n", "category": "Other"}, {"uro": "Úle", "ipa": "[úlē]", "english": "Mother", "pos": "n", "category": "Family"}, {"uro": "Ulẹ", "ipa": "[ūlɛ̄]", "english": "Chin", "pos": "n", "category": "Other"}, {"uro": "Úna", "ipa": "[únā]", "english": "In-law, relative by marriage", "pos": "n", "category": "Family"}, {"uro": "Unchán", "ipa": "[ũ̄t͡ʃã́]", "english": "Vein", "pos": "n", "category": "Other"}, {"uro": "Undọ eyevọ́ ọkwẹ", "ipa": "[ũ̄dɔ̄ ējēvɔ́ ɔ̄kʷɛ̄]", "english": "MOTHER&apos;S BROTHER", "pos": "n", "category": "Family"}, {"uro": "Undọ ọkwọ", "ipa": "[ũ̄dɔ̄ ɔ̄kʷɔ̄]", "english": "Elder Brother", "pos": "n", "category": "Other"}, {"uro": "Ungà", "ipa": "[ũ̄gà]", "english": "Hoe", "pos": "n", "category": "Other"}, {"uro": "Ùngbà", "ipa": "[ũ̀g͡bà]", "english": "Whistle (N)", "pos": "n", "category": "Other"}, {"uro": "Unphén", "ipa": "[ũ̄ɸén]", "english": "Knife", "pos": "n", "category": "Other"}, {"uro": "Únrẹn", "ipa": "[ṹrɛ̃̄]", "english": "Elephant", "pos": "n", "category": "Other"}, {"uro": "Ùnṣẹ àvà", "ipa": "[ũ̀ʃɛ̄ àvà]", "english": "(be) sleepy", "pos": "v", "category": "Other"}, {"uro": "Unsin", "ipa": "[ũ̄sĩ̄]", "english": "King", "pos": "n", "category": "Other"}, {"uro": "Únwa", "ipa": "[únwā]", "english": "Baby", "pos": "n", "category": "Other"}, {"uro": "Únwa", "ipa": "[únwā]", "english": "Child", "pos": "n", "category": "Family"}, {"uro": "Unwa àgbò", "ipa": "[ũ̄wā àgbò]", "english": "Ewe", "pos": "n", "category": "Other"}, {"uro": "Unwa àran", "ipa": "[ũ̄wā àrã̄]", "english": "Kid", "pos": "n", "category": "Other"}, {"uro": "Unwa ẹ́hẹ", "ipa": "[ũ̄wā ɛ́hɛ̄]", "english": "Chick", "pos": "n", "category": "Other"}, {"uro": "Unwa ẹ̀lẹdẹ̀", "ipa": "[ũ̄wā ɛ̀lɛ̄dɛ̀]", "english": "Piglet", "pos": "n", "category": "Animals"}, {"uro": "Únwá eléshwi", "ipa": "[únwá ēléɸī]", "english": "Girl", "pos": "n", "category": "Other"}, {"uro": "Ùnwa ijù", "ipa": "[ùnwā īdʒù]", "english": "Eye", "pos": "n", "category": "Other"}, {"uro": "Unwa màálù", "ipa": "[ũ̄wā màálù]", "english": "Heifer", "pos": "n", "category": "Other"}, {"uro": "Unwa músùn", "ipa": "[ũ̄wā músũ̀]", "english": "Kitten", "pos": "n", "category": "Other"}, {"uro": "Unwa ńdọ́", "ipa": "[ūn̄wā ńdɔ́]", "english": "(domestic) servant", "pos": "n", "category": "Other"}, {"uro": "Unwa nwa", "ipa": "[ūnwā n̄wā]", "english": "Grandchild", "pos": "n", "category": "Family"}, {"uro": "Unwa nwa iyévó eléshwi", "ipa": "[ūn̄wā n̄wā ījévó ēléɸī]", "english": "Neice", "pos": "n", "category": "Other"}, {"uro": "Unwa nwa iyévó ọ́kwọ", "ipa": "[ūnwā n̄wā ījévó ɔ́kwɔ̄]", "english": "Nephew", "pos": "n", "category": "Other"}, {"uro": "Únwá ọ́kwọ", "ipa": "[únwá ɔ́kʷɔ̄]", "english": "Boy", "pos": "n", "category": "Other"}, {"uro": "Unwa ọ̀kwọ̀", "ipa": "[ūnwā ɔ̀kwɔ̀]", "english": "Son", "pos": "n", "category": "Other"}, {"uro": "Unwa òlo", "ipa": "[ūn̄wā òlō]", "english": "Army", "pos": "n", "category": "Other"}, {"uro": "Unwa ópú", "ipa": "[ũ̄wā ópú]", "english": "Pup", "pos": "n", "category": "Other"}, {"uro": "Ùnweshwí", "ipa": "[ùnwēɸí]", "english": "Virgin", "pos": "n", "category": "Other"}, {"uro": "Úrá", "ipa": "[úrá]", "english": "Yesterday", "pos": "n", "category": "Time"}, {"uro": "Ùrà", "ipa": "[ùrà]", "english": "Wine", "pos": "n", "category": "Other"}, {"uro": "Ùrà", "ipa": "[ùrà]", "english": "Wine/beer", "pos": "n", "category": "Other"}, {"uro": "Úràgẹ̀", "ipa": "[úràgɛ̀]", "english": "(be) generous", "pos": "v", "category": "Other"}, {"uro": "Úrán", "ipa": "[úrã́]", "english": "Groom", "pos": "n", "category": "Other"}, {"uro": "Uren", "ipa": "[ūrēn]", "english": "Iron (metal)", "pos": "n", "category": "Other"}, {"uro": "Úrirí", "ipa": "[úrīrí]", "english": "Room", "pos": "n", "category": "Other"}, {"uro": "Úró vè", "ipa": "[úró vè]", "english": "Away from", "pos": "n", "category": "Other"}, {"uro": "Úrọ́n", "ipa": "[úrɔ̃́]", "english": "Husband", "pos": "n", "category": "Other"}, {"uro": "Urunun", "ipa": "[ūrūnũ̄]", "english": "In", "pos": "n", "category": "Other"}, {"uro": "Ùsẹ̀", "ipa": "[ùsɛ̀]", "english": "Ocean, sea", "pos": "n", "category": "Other"}, {"uro": "Ùsẹ̀", "ipa": "[ùsɛ̀]", "english": "River", "pos": "n", "category": "Other"}, {"uro": "Usẹ agoo", "ipa": "[ūsɛ̄ āgōō]", "english": "Thirst", "pos": "n", "category": "Other"}, {"uro": "Uṣẹàgò", "ipa": "[ūʃɛ̄àgṑ]", "english": "(be) thirsty, thirst (v)", "pos": "v", "category": "Other"}, {"uro": "Ùsẹn", "ipa": "[ùsɛ̃̄]", "english": "Sing", "pos": "v", "category": "Other"}, {"uro": "Úṣí", "ipa": "[úʃí]", "english": "Father", "pos": "n", "category": "Family"}, {"uro": "Ùsirà", "ipa": "[ùsīrà]", "english": "Lie(s)", "pos": "n", "category": "Other"}, {"uro": "Útó", "ipa": "[útó]", "english": "Ear", "pos": "n", "category": "Other"}, {"uro": "Útúren", "ipa": "[útúrẽ̄]", "english": "Wife", "pos": "n", "category": "Other"}, {"uro": "Úvọ́", "ipa": "[úvɔ́]", "english": "Arm", "pos": "n", "category": "Other"}, {"uro": "Úvọ́", "ipa": "[úvɔ́]", "english": "Hand", "pos": "n", "category": "Body Parts"}, {"uro": "Úvọ̀kù", "ipa": "[úvɔ̀kù]", "english": "Bottom", "pos": "n", "category": "Other"}, {"uro": "Úvọ́nẹ ochájá", "ipa": "[úvɔ́nɛ̄ ōt͡ʃád͡ʒá]", "english": "Trader", "pos": "n", "category": "Other"}, {"uro": "Úvọ́nẹ ópàran", "ipa": "[úvɔ́nɛ̄ ópàrã̄]", "english": "Butcher (n)", "pos": "n", "category": "Other"}, {"uro": "Úvọ́nẹ óróńgá/ úvọ́rẹ róvóńgá", "ipa": "[úvɔ́nɛ̄ óróńgá/ úvɔ́rɛ̄ róvóńgá]", "english": "Weaver", "pos": "n", "category": "Other"}, {"uro": "Úvónẹ róvẹ̀vẹ", "ipa": "[úvónɛ̄ róvɛ̀vɛ̄]", "english": "Beggar", "pos": "n", "category": "Food & Farm"}, {"uro": "Úvónẹró shwíshwí", "ipa": "[úvónɛ̄ró ɸíɸí]", "english": "Midwife", "pos": "n", "category": "Other"}, {"uro": "Úvọ́rẹnró kpurin gbàjigbàji", "ipa": "[úvɔ́rɛ̃̄ró k͡pūrĩ̄ g͡bàd͡ʒīg͡bàd͡ʒī]", "english": "Blacksmith", "pos": "n", "category": "Other"}, {"uro": "Úvọ́rẹnró màchà", "ipa": "[úvɔ́rɛ̃̄ró màt͡ʃà]", "english": "Potter", "pos": "n", "category": "Other"}, {"uro": "Ùwà", "ipa": "[ùwà]", "english": "Farm", "pos": "n", "category": "Other"}, {"uro": "Ùwajù", "ipa": "[ùwād͡ʒù]", "english": "Front (of something)", "pos": "n", "category": "Other"}, {"uro": "Uwájù", "ipa": "[ūwád͡ʒù]", "english": "Forward (direction)", "pos": "n", "category": "Other"}, {"uro": "Uwan eleshwi", "ipa": "[ūwã̄ ēlēɸī]", "english": "Daughter", "pos": "n", "category": "Other"}, {"uro": "Uwan Ìgú", "ipa": "[ūwã̄ ìgú]", "english": "Native", "pos": "n", "category": "Other"}, {"uro": "Uwánrín", "ipa": "[ūwã́rĩ́]", "english": "Children", "pos": "n", "category": "Family"}, {"uro": "Úwàrí", "ipa": "[úwa᷈̀ri᷈́]", "english": "Now", "pos": "adv", "category": "Other"}, {"uro": "Uwọ̀", "ipa": "[ūwɔ̀]", "english": "Bee", "pos": "n", "category": "Other"}, {"uro": "Uwọ̀", "ipa": "[ūwɔ̀]", "english": "Honey", "pos": "n", "category": "Other"}, {"uro": "Úwọ̀kù", "ipa": "[úwɔ̀kù]", "english": "Down", "pos": "n", "category": "Other"}, {"uro": "Uwọn", "ipa": "[ūwɔ̃̄]", "english": "He (human)", "pos": "n", "category": "Family"}, {"uro": "Uwu", "ipa": "[ūwū]", "english": "Smoke", "pos": "n", "category": "Other"}, {"uro": "Ùyà", "ipa": "[ùjà]", "english": "Tail", "pos": "n", "category": "Other"}, {"uro": "Uyó̩n", "ipa": "[ūjón]", "english": "Delicate", "pos": "n", "category": "Animals"}, {"uro": "Vá", "ipa": "[vá]", "english": "Come", "pos": "v", "category": "Other"}, {"uro": "Vá", "ipa": "[vá]", "english": "Towards", "pos": "n", "category": "Other"}, {"uro": "Váà yun", "ipa": "[váà jũ̄]", "english": "(be) blunt, dull", "pos": "v", "category": "Other"}, {"uro": "Váàgè", "ipa": "[váàgè]", "english": "(be) light (not heavy)", "pos": "v", "category": "Other"}, {"uro": "Váàjìn", "ipa": "[váàd͡ʒĩ̀]", "english": "(be) shallow", "pos": "v", "category": "Other"}, {"uro": "Váàsèéro", "ipa": "[váàsèérō]", "english": "No", "pos": "n", "category": "Other"}, {"uro": "Váàshwẹ", "ipa": "[váàɸɛ̄]", "english": "(be) wrong", "pos": "v", "category": "Other"}, {"uro": "Váàshwu", "ipa": "[váàɸū]", "english": "Lack (v)", "pos": "v", "category": "Other"}, {"uro": "Vadí", "ipa": "[vādí]", "english": "Arrive", "pos": "v", "category": "Other"}, {"uro": "Vágẹ̀ji", "ipa": "[vágɛ̀d͡ʒī]", "english": "(be) weak", "pos": "v", "category": "Other"}, {"uro": "Váǹdù", "ipa": "[váǹdù]", "english": "(be) short", "pos": "v", "category": "Other"}, {"uro": "Váǹdù", "ipa": "[váǹdù]", "english": "Shorten", "pos": "v", "category": "Other"}, {"uro": "Vánìwọ̀n", "ipa": "[vánìwɔ̃̀]", "english": "(be) amusing, funny", "pos": "v", "category": "Other"}, {"uro": "Vaǹṣẹ", "ipa": "[vāǹʃɛ̄]", "english": "(be) dizzy", "pos": "v", "category": "Other"}, {"uro": "Vánṣí", "ipa": "[vã́ʃí]", "english": "(be) low", "pos": "v", "category": "Other"}, {"uro": "Vaso", "ipa": "[vāsō]", "english": "Nobody", "pos": "n", "category": "Body Parts"}, {"uro": "Vè", "ipa": "[vè]", "english": "Go", "pos": "v", "category": "Other"}, {"uro": "Vẹ", "ipa": "[vɛ̄]", "english": "Beg (for money)", "pos": "v", "category": "Other"}, {"uro": "Verè-é", "ipa": "[vērè-é]", "english": "Go round, detour", "pos": "v", "category": "Other"}, {"uro": "Vəphọ", "ipa": "[vəɸɔ̄]", "english": "(be) unripe", "pos": "v", "category": "Other"}, {"uro": "Waju eȷẹ̀n", "ipa": "[wādʒū ēȷɛ̃̀]", "english": "Molar tooth", "pos": "n", "category": "Body Parts"}, {"uro": "Wẹ̀", "ipa": "[wɛ̀]", "english": "Rain", "pos": "n", "category": "Nature"}, {"uro": "Wègọ", "ipa": "[wègɔ̄]", "english": "Kneel", "pos": "v", "category": "Body Parts"}, {"uro": "Wẹnsọ", "ipa": "[wɛ̃̄sɔ̄]", "english": "Light (fire) (v)", "pos": "v", "category": "Other"}, {"uro": "Wi", "ipa": "[wī]", "english": "Forget", "pos": "n", "category": "Other"}, {"uro": "Wò", "ipa": "[wò]", "english": "Swelling", "pos": "n", "category": "Other"}, {"uro": "Wò̩", "ipa": "[wò]", "english": "Weep (cry)", "pos": "n", "category": "Other"}, {"uro": "Wọ́", "ipa": "[wɔ᷈́]", "english": "Dry up, evaporate", "pos": "n", "category": "Other"}, {"uro": "Wọ́", "ipa": "[wɔ᷈́]", "english": "Scratch (v)", "pos": "v", "category": "Other"}, {"uro": "Wọ́", "ipa": "[wɔ́]", "english": "Curve (n)", "pos": "n", "category": "Other"}, {"uro": "Wọhíì", "ipa": "[wɔ̄híì]", "english": "Wail, ululate (at funeral) (v)", "pos": "v", "category": "Other"}, {"uro": "Wọn", "ipa": "[wɔ̃̄]", "english": "Laugh", "pos": "v", "category": "Other"}, {"uro": "Wórò", "ipa": "[wórò]", "english": "Noise, sound (n)", "pos": "n", "category": "Other"}, {"uro": "Wù", "ipa": "[wù]", "english": "Swell (intr)", "pos": "n", "category": "Other"}, {"uro": "Wuma", "ipa": "[wūmā]", "english": "Ask (question)", "pos": "v", "category": "Other"}, {"uro": "Wuma hẹ̀n", "ipa": "[wūmā hɛ̃̀]", "english": "Ask (request)", "pos": "v", "category": "Other"}, {"uro": "Wúsii", "ipa": "[wúsīī]", "english": "Close", "pos": "v", "category": "Other"}, {"uro": "Ya", "ipa": "[jā]", "english": "Crawl", "pos": "v", "category": "Other"}, {"uro": "Ya", "ipa": "[jā]", "english": "Crawl (lizard)", "pos": "v", "category": "Animals"}, {"uro": "Ya", "ipa": "[jā]", "english": "Slime (organic)", "pos": "n", "category": "Other"}, {"uro": "Yá", "ipa": "[já]", "english": "Pull", "pos": "v", "category": "Other"}, {"uro": "Yáají", "ipa": "[jáād͡ʒí]", "english": "(be) fast", "pos": "v", "category": "Other"}, {"uro": "Yáají", "ipa": "[jáād͡ʒí]", "english": "Hasten, hurry", "pos": "v", "category": "Other"}, {"uro": "Yahò", "ipa": "[jāhò]", "english": "Wrinkle (on skin)", "pos": "n", "category": "Body Parts"}, {"uro": "Yaji", "ipa": "[jād͡ʒī]", "english": "Soon", "pos": "adv", "category": "Other"}, {"uro": "Yàn", "ipa": "[jã̀]", "english": "Bend, crook,", "pos": "v", "category": "Other"}, {"uro": "Yánàn", "ipa": "[jã́ã̀]", "english": "Yawn", "pos": "v", "category": "Other"}, {"uro": "Yànyàn", "ipa": "[jã̀jã̀]", "english": "Return (intr.)", "pos": "v", "category": "Other"}, {"uro": "Yàyà", "ipa": "[ja᷈̀ja᷈̀]", "english": "Return, go back", "pos": "v", "category": "Other"}, {"uro": "Yé", "ipa": "[jé]", "english": "Stumble", "pos": "v", "category": "Other"}, {"uro": "Yé", "ipa": "[jé]", "english": "Fall (intr)", "pos": "v", "category": "Other"}, {"uro": "Yẹ̀", "ipa": "[jɛ̀]", "english": "Dance (v)", "pos": "v", "category": "Other"}, {"uro": "Yẹ", "ipa": "[jɛ̄]", "english": "Defecate", "pos": "v", "category": "Animals"}, {"uro": "Yẹ", "ipa": "[jɛ̄]", "english": "Build (house)", "pos": "v", "category": "Places"}, {"uro": "Yée", "ipa": "[jéē]", "english": "Like", "pos": "n", "category": "Other"}, {"uro": "Yẹ̀n", "ipa": "[jɛ̃̀]", "english": "(be) pregnant", "pos": "v", "category": "Other"}, {"uro": "Yẹ̀n", "ipa": "[jɛ̃̀]", "english": "(be) sweet", "pos": "v", "category": "Other"}, {"uro": "Yẹndá", "ipa": "[jɛ̃̄dá]", "english": "Remember", "pos": "n", "category": "Other"}, {"uro": "Yéreju", "ipa": "[jérēd͡ʒū]", "english": "Crunch", "pos": "n", "category": "Other"}, {"uro": "Yí", "ipa": "[jí]", "english": "Ascend, go up", "pos": "v", "category": "Other"}, {"uro": "Yí", "ipa": "[jí]", "english": "Shake (tr)", "pos": "v", "category": "Other"}, {"uro": "Yíi", "ipa": "[jíī]", "english": "Climb", "pos": "v", "category": "Other"}, {"uro": "Yìn-ra", "ipa": "[jĩ̀-rā]", "english": "Shoot", "pos": "n", "category": "Other"}, {"uro": "Yìngo", "ipa": "[jĩ̀gō]", "english": "Diarrhea", "pos": "n", "category": "Other"}, {"uro": "Yínwọ́", "ipa": "[jĩ́wɔ́]", "english": "Wave (hand as a greeting) (v)", "pos": "v", "category": "Body Parts"}, {"uro": "Yò", "ipa": "[jò]", "english": "Bury", "pos": "v", "category": "Other"}, {"uro": "Yun", "ipa": "[jũ̄]", "english": "(be) sharp", "pos": "v", "category": "Other"}]`);
+
+// ═══════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════
+let mode = '';
+let selectedCats = new Set(['All']);
+let difficulty = 'easy';
+let questions = [];
+let qIdx = 0;
+let score = 0;
+let correct = 0;
+let wrong = 0;
+let streak = 0;
+let bestStreak = 0;
+let roundWords = [];
+let timerInterval = null;
+let timeLeft = 0;
+let answered = false;
+
+// Persistent stats
+let stats = JSON.parse(localStorage.getItem('uro_stats') || '{"played":0,"best":0,"words":0}');
+
+// Match game state
+let matchItems = [];
+let matchSelected = null;
+let matchScore = 0;
+let matchRound = 0;
+let matchTotal = 0;
+
+const CATS = ['Body Parts','Animals','Food & Farm','Family','Nature','Actions','Emotions','Places','Time','Other'];
+const QUESTIONS_PER_GAME = 10;
+const MATCH_PAIRS = 6;
+
+// ═══════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════
+function init() {
+  // Build category buttons
+  const grid = document.getElementById('cat-grid');
+  ['All', ...CATS].forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'cat-btn' + (cat === 'All' ? ' selected' : '');
+    btn.textContent = cat + (cat !== 'All' ? ` (${RAW.filter(e=>e.category===cat).length})` : '');
+    btn.dataset.cat = cat;
+    btn.onclick = () => toggleCat(cat, btn);
+    grid.appendChild(btn);
+  });
+  updateStatsDisplay();
+}
+
+function toggleCat(cat, btn) {
+  if (cat === 'All') {
+    selectedCats = new Set(['All']);
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+  } else {
+    selectedCats.delete('All');
+    document.querySelector('[data-cat="All"]').classList.remove('selected');
+    if (selectedCats.has(cat)) {
+      selectedCats.delete(cat);
+      btn.classList.remove('selected');
+    } else {
+      selectedCats.add(cat);
+      btn.classList.add('selected');
+    }
+    if (selectedCats.size === 0) {
+      selectedCats.add('All');
+      document.querySelector('[data-cat="All"]').classList.add('selected');
+    }
+  }
+}
+
+function selectDiff(btn) {
+  difficulty = btn.dataset.diff;
+  document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function getPool() {
+  let pool = selectedCats.has('All') ? RAW : RAW.filter(e => selectedCats.has(e.category));
+  // Deduplicate by uro+english
+  const seen = new Set();
+  return pool.filter(e => {
+    const k = e.uro + '|' + e.english;
+    if (seen.has(k)) return false;
+    seen.add(k); return true;
+  });
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i+1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ═══════════════════════════════════════════
+//  START GAME
+// ═══════════════════════════════════════════
+function startGame(m) {
+  mode = m;
+  const pool = getPool();
+  if (pool.length < 4) { alert('Not enough words in selected categories. Please select more.'); return; }
+
+  clearTimer();
+  score = 0; correct = 0; wrong = 0; streak = 0; bestStreak = 0;
+  roundWords = [];
+  answered = false;
+
+  if (mode === 'match') {
+    startMatchGame(pool);
+    return;
+  }
+
+  questions = shuffle(pool).slice(0, QUESTIONS_PER_GAME);
+  qIdx = 0;
+
+  showScreen('game');
+  renderQuestion();
+}
+
+// ═══════════════════════════════════════════
+//  MCQ GAME
+// ═══════════════════════════════════════════
+function renderQuestion() {
+  if (qIdx >= questions.length) { endGame(); return; }
+
+  clearTimer();
+  answered = false;
+  const q = questions[qIdx];
+  roundWords.push(q);
+
+  // Update header
+  document.getElementById('game-meta').textContent = `Question ${qIdx+1}/${questions.length}`;
+  document.getElementById('score-display').textContent = score;
+  document.getElementById('prog-fill').style.width = (qIdx / questions.length * 100) + '%';
+
+  // Streak dots
+  const dots = document.getElementById('streak-dots');
+  dots.innerHTML = '';
+  for (let i = 0; i < 5; i++) {
+    const d = document.createElement('div');
+    d.className = 'streak-dot' + (i < Math.min(streak, 5) ? ' on' : '');
+    dots.appendChild(d);
+  }
+  document.getElementById('streak-count').textContent = streak;
+
+  // Question card
+  document.getElementById('q-cat').textContent = q.category;
+  document.getElementById('q-ipa').textContent = q.ipa;
+  document.getElementById('q-pos').textContent = q.pos === 'v' ? 'verb' : q.pos === 'adj' ? 'adjective' : q.pos === 'adv' ? 'adverb' : 'noun';
+
+  // Hide feedback & next
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback';
+  document.getElementById('next-btn').className = 'next-btn';
+
+  // TYPE mode
+  const typeArea = document.getElementById('type-area');
+  const optGrid = document.getElementById('options-grid');
+
+  if (mode === 'type') {
+    document.getElementById('q-direction').textContent = 'Type the Uro word:';
+    document.getElementById('q-word').textContent = q.english;
+    document.getElementById('q-ipa').textContent = '';
+    typeArea.className = 'type-area show';
+    optGrid.style.display = 'none';
+    const inp = document.getElementById('type-input');
+    inp.value = '';
+    inp.className = 'type-input';
+    inp.focus();
+  } else {
+    typeArea.className = 'type-area';
+    optGrid.style.display = 'grid';
+
+    if (mode === 'mcq-uro') {
+      document.getElementById('q-direction').textContent = 'What does this Uro word mean?';
+      document.getElementById('q-word').textContent = q.uro;
+      document.getElementById('q-ipa').textContent = q.ipa;
+    } else {
+      document.getElementById('q-direction').textContent = 'Which Uro word means…';
+      document.getElementById('q-word').textContent = q.english;
+      document.getElementById('q-ipa').textContent = '';
+    }
+
+    // Build options
+    const pool = getPool();
+    const numOptions = difficulty === 'easy' ? 4 : 4;
+    const others = shuffle(pool.filter(e => e.uro !== q.uro && e.english !== q.english)).slice(0, numOptions - 1);
+    const options = shuffle([q, ...others]);
+
+    optGrid.innerHTML = '';
+    options.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = 'opt-btn';
+      btn.textContent = mode === 'mcq-uro' ? opt.english : opt.uro;
+      btn.onclick = () => selectAnswer(btn, opt, q);
+      optGrid.appendChild(btn);
+    });
+  }
+
+  // Timer for medium/hard
+  if (difficulty !== 'easy') {
+    const totalTime = difficulty === 'medium' ? 10 : 7;
+    startTimer(totalTime);
+  }
+}
+
+function startTimer(seconds) {
+  const bar = document.getElementById('timer-bar');
+  const fill = document.getElementById('timer-fill');
+  bar.style.display = 'block';
+  timeLeft = seconds;
+  fill.style.width = '100%';
+  fill.className = 'timer-fill';
+
+  timerInterval = setInterval(() => {
+    timeLeft -= 0.1;
+    const pct = Math.max(0, timeLeft / seconds * 100);
+    fill.style.width = pct + '%';
+    if (pct < 30) fill.className = 'timer-fill urgent';
+    if (timeLeft <= 0) {
+      clearTimer();
+      if (!answered) timeUp();
+    }
+  }, 100);
+}
+
+function clearTimer() {
+  clearInterval(timerInterval);
+  document.getElementById('timer-bar').style.display = 'none';
+}
+
+function timeUp() {
+  answered = true;
+  wrong++;
+  streak = 0;
+  const q = questions[qIdx];
+  q._correct = false;
+  showFeedback(false, `Time's up! The answer was: ${mode === 'mcq-uro' ? q.english : q.uro}`);
+  // Reveal correct option
+  document.querySelectorAll('.opt-btn').forEach(btn => {
+    btn.disabled = true;
+    const isCorrect = mode === 'mcq-uro' ? btn.textContent === q.english : btn.textContent === q.uro;
+    if (isCorrect) btn.className = 'opt-btn reveal';
+  });
+  document.getElementById('next-btn').className = 'next-btn show';
+}
+
+function selectAnswer(btn, chosen, q) {
+  if (answered) return;
+  answered = true;
+  clearTimer();
+
+  const isCorrect = chosen.uro === q.uro;
+  q._correct = isCorrect;
+
+  document.querySelectorAll('.opt-btn').forEach(b => {
+    b.disabled = true;
+    const bIsCorrect = mode === 'mcq-uro' ? b.textContent === q.english : b.textContent === q.uro;
+    if (bIsCorrect) b.className = 'opt-btn correct';
+  });
+
+  if (isCorrect) {
+    btn.className = 'opt-btn correct';
+    const bonus = difficulty === 'medium' ? Math.ceil(timeLeft * 3) : difficulty === 'hard' ? Math.ceil(timeLeft * 5) : 10;
+    const streakBonus = streak >= 3 ? 5 : 0;
+    score += bonus + streakBonus;
+    correct++;
+    streak++;
+    bestStreak = Math.max(bestStreak, streak);
+    showFeedback(true, `✓ Correct! +${bonus}pts${streakBonus ? ` +${streakBonus} streak bonus` : ''}`);
+  } else {
+    btn.className = 'opt-btn wrong';
+    wrong++;
+    streak = 0;
+    showFeedback(false, `The correct answer is: ${mode === 'mcq-uro' ? q.english : q.uro}`);
+  }
+
+  document.getElementById('score-display').textContent = score;
+  document.getElementById('next-btn').className = 'next-btn show';
+}
+
+function submitType() {
+  if (answered) return;
+  answered = true;
+  clearTimer();
+
+  const q = questions[qIdx];
+  const input = document.getElementById('type-input');
+  const val = input.value.trim();
+
+  // Flexible match: strip diacritics for comparison
+  function normalize(s) {
+    return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+  }
+
+  const isCorrect = normalize(val) === normalize(q.uro) || val.toLowerCase() === q.uro.toLowerCase();
+  q._correct = isCorrect;
+
+  if (isCorrect) {
+    input.className = 'type-input correct';
+    const pts = difficulty === 'hard' ? 20 : 15;
+    score += pts;
+    correct++;
+    streak++;
+    bestStreak = Math.max(bestStreak, streak);
+    showFeedback(true, `✓ Correct! The Uro word is: ${q.uro} ${q.ipa}`);
+  } else {
+    input.className = 'type-input wrong';
+    wrong++;
+    streak = 0;
+    showFeedback(false, `The correct spelling is: ${q.uro} ${q.ipa}`);
+  }
+
+  document.getElementById('score-display').textContent = score;
+  document.getElementById('next-btn').className = 'next-btn show';
+}
+
+function showFeedback(ok, text) {
+  const fb = document.getElementById('feedback');
+  const icon = document.getElementById('fb-icon');
+  const ftxt = document.getElementById('fb-text');
+  fb.className = 'feedback show ' + (ok ? 'correct' : 'wrong');
+  icon.textContent = ok ? '✓' : '✗';
+  ftxt.textContent = text;
+}
+
+function nextQuestion() {
+  qIdx++;
+  renderQuestion();
+}
+
+// ═══════════════════════════════════════════
+//  MATCH GAME
+// ═══════════════════════════════════════════
+function startMatchGame(pool) {
+  matchSelected = null;
+  matchScore = 0;
+  matchRound = 0;
+  matchTotal = Math.floor(pool.length / MATCH_PAIRS) * MATCH_PAIRS;
+  matchTotal = Math.min(matchTotal, MATCH_PAIRS * 5); // max 5 rounds
+  roundWords = [];
+
+  document.getElementById('match-score').textContent = 0;
+  document.getElementById('match-prog').style.width = '0%';
+
+  showScreen('match-screen');
+  loadMatchRound(pool);
+}
+
+function loadMatchRound(pool) {
+  const pairs = shuffle(pool).slice(0, MATCH_PAIRS);
+  roundWords.push(...pairs);
+
+  const uroCards = pairs.map((p,i) => ({ id: i, text: p.uro, type: 'uro', ref: p }));
+  const engCards = pairs.map((p,i) => ({ id: i, text: p.english, type: 'eng', ref: p }));
+  matchItems = shuffle([...uroCards, ...engCards]);
+
+  const grid = document.getElementById('match-grid');
+  grid.innerHTML = '';
+
+  matchItems.forEach((item, idx) => {
+    const card = document.createElement('div');
+    card.className = 'match-card' + (item.type === 'uro' ? ' uro-card' : '');
+    card.textContent = item.text;
+    card.dataset.idx = idx;
+    card.onclick = () => selectMatchCard(card, item);
+    grid.appendChild(card);
+  });
+
+  const fb = document.getElementById('match-feedback');
+  fb.className = 'feedback';
+}
+
+let matchLock = false;
+
+function selectMatchCard(card, item) {
+  if (matchLock || card.classList.contains('matched')) return;
+
+  if (!matchSelected) {
+    card.classList.add('selected');
+    matchSelected = { card, item };
+    return;
+  }
+
+  if (matchSelected.card === card) {
+    card.classList.remove('selected');
+    matchSelected = null;
+    return;
+  }
+
+  // Check pair
+  const a = matchSelected;
+  const b = { card, item };
+
+  if (a.item.id === b.item.id && a.item.type !== b.item.type) {
+    // Match!
+    a.card.classList.remove('selected');
+    a.card.classList.add('matched');
+    b.card.classList.add('matched');
+    matchScore += 10;
+    document.getElementById('match-score').textContent = matchScore;
+    matchSelected = null;
+
+    // Check if all matched
+    const remaining = document.querySelectorAll('.match-card:not(.matched)');
+    if (remaining.length === 0) {
+      matchRound++;
+      const pct = matchRound / (matchTotal / MATCH_PAIRS) * 100;
+      document.getElementById('match-prog').style.width = pct + '%';
+
+      if (matchRound >= matchTotal / MATCH_PAIRS || matchRound >= 5) {
+        setTimeout(() => {
+          score = matchScore;
+          correct = matchRound * MATCH_PAIRS;
+          wrong = 0;
+          bestStreak = matchRound;
+          endGame();
+        }, 600);
+      } else {
+        setTimeout(() => {
+          const pool = getPool().filter(e => !roundWords.find(r => r.uro === e.uro));
+          if (pool.length >= MATCH_PAIRS) loadMatchRound(pool);
+          else endGame();
+        }, 600);
+      }
+    }
+  } else {
+    // Wrong
+    matchLock = true;
+    a.card.classList.remove('selected');
+    a.card.classList.add('wrong-flash');
+    b.card.classList.add('wrong-flash');
+    wrong++;
+    setTimeout(() => {
+      a.card.classList.remove('wrong-flash');
+      b.card.classList.remove('wrong-flash');
+      matchSelected = null;
+      matchLock = false;
+    }, 600);
+  }
+}
+
+// ═══════════════════════════════════════════
+//  END GAME
+// ═══════════════════════════════════════════
+function endGame() {
+  clearTimer();
+  stats.played++;
+  stats.words += roundWords.length;
+  if (score > stats.best) stats.best = score;
+  localStorage.setItem('uro_stats', JSON.stringify(stats));
+
+  const total = correct + wrong;
+  const pct = total > 0 ? Math.round(correct / total * 100) : 0;
+
+  let title = pct >= 90 ? 'Ọ̀tọ̀ Sísú! 🏆' : pct >= 70 ? 'Well Done! 🎉' : pct >= 50 ? 'Good effort 👍' : 'Keep Practising 💪';
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-sub').textContent = `${pct}% accuracy · ${mode.replace('mcq-uro','Uro→English').replace('mcq-eng','English→Uro').replace('type','Typing').replace('match','Matching')} mode`;
+  document.getElementById('result-score').textContent = score;
+  document.getElementById('res-correct').textContent = correct;
+  document.getElementById('res-wrong').textContent = wrong;
+  document.getElementById('res-streak').textContent = bestStreak;
+
+  // Review list
+  const list = document.getElementById('review-list');
+  list.innerHTML = '';
+  const shown = new Set();
+  roundWords.forEach(w => {
+    if (shown.has(w.uro)) return;
+    shown.add(w.uro);
+    const div = document.createElement('div');
+    div.className = 'review-item';
+    div.innerHTML = `<span class="review-uro">${w.uro}</span><span class="review-eng">${w.english}</span><span class="review-tick">${w._correct === false ? '✗' : '✓'}</span>`;
+    list.appendChild(div);
+  });
+
+  showScreen('results');
+}
+
+function playAgain() { startGame(mode); }
+
+function goHome() {
+  clearTimer();
+  updateStatsDisplay();
+  showScreen('home');
+}
+
+function updateStatsDisplay() {
+  document.getElementById('stat-played').textContent = stats.played;
+  document.getElementById('stat-best').textContent = stats.best || '—';
+  document.getElementById('stat-words').textContent = stats.words;
+}
+
+// Enter key for type mode
+document.addEventListener('keydown', e => {
+  if (document.getElementById('game').classList.contains('active')) {
+    if (e.key === 'Enter' && mode === 'type' && !answered) submitType();
+    else if (e.key === 'Enter' && answered) nextQuestion();
+  }
+});
+
+init();
+</script>
+</body>
+</html>

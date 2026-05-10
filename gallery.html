@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gallery — Uro Documentation Project</title>
+  <meta name="description" content="Field photos from the Uro Documentation Project. Unfiltered, unserious, real." />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/gallery.css" />
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📸</text></svg>" />
+</head>
+<body>
+
+<div class="ticker" aria-hidden="true">
+  <span class="ticker-inner">
+    FROM THE FIELD <span class="ticker-sep">✦</span>
+    AJOWA AKOKO, ONDO STATE <span class="ticker-sep">✦</span>
+    STRONGHEAD LINGUISTS ON LOCATION <span class="ticker-sep">✦</span>
+    URO DOCUMENTATION PROJECT <span class="ticker-sep">✦</span>
+    FROM THE FIELD <span class="ticker-sep">✦</span>
+    AJOWA AKOKO, ONDO STATE <span class="ticker-sep">✦</span>
+    STRONGHEAD LINGUISTS ON LOCATION <span class="ticker-sep">✦</span>
+    URO DOCUMENTATION PROJECT <span class="ticker-sep">✦</span>
+  </span>
+</div>
+
+<nav>
+  <a href="index.html" class="nav-brand">URO<span>_</span>PROJECT</a>
+  <button class="nav-toggle" aria-label="Toggle menu">&#9776;</button>
+  <ul class="nav-links">
+    <li><a href="index.html#story">Our Story</a></li>
+    <li><a href="index.html#resources">Resources</a></li>
+    <li><a href="index.html#language">Language</a></li>
+    <li><a href="team.html">Team</a></li>
+    <li><a href="gallery.html" style="color:var(--clay2);">Gallery</a></li>
+    <li><a href="index.html#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="gallery-hero">
+  <div class="gh-inner">
+    <div class="gh-label">From the Field</div>
+    <h1 class="gh-title">Not a formal<br><em>photo album.</em></h1>
+    <p class="gh-sub">
+      Real moments. Real people. Real fieldwork.<br>
+      Captions included &mdash; as chaotic as the trip itself.<br><br><span style="font-family:var(--mono);font-size:0.62rem;color:rgba(162,152,128,0.65);letter-spacing:0.1em;text-transform:uppercase;">Only 4 people were on the ground. All hands were on deck. We took pictures when we could.</span><br><br><span style="font-family:var(--mono);font-size:0.65rem;color:rgba(162,152,128,0.7);letter-spacing:0.1em;text-transform:uppercase;">Only 4 people were on the ground — all hands were on deck. We took pictures when we could.</span>
+    </p>
+  </div>
+</div>
+
+<!-- GALLERY GRID -->
+<div class="gallery-section">
+  <div class="gallery-grid" id="gallery-grid">
+    <div class="gallery-loading">
+      <div class="gl-spinner"></div>
+      <p>Loading photos&hellip;</p>
+    </div>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox">
+  <button class="lb-close" id="lb-close">&times;</button>
+  <button class="lb-prev" id="lb-prev">&#8592;</button>
+  <button class="lb-next" id="lb-next">&#8594;</button>
+  <div class="lb-inner">
+    <img src="" alt="" id="lb-img" />
+    <div class="lb-caption" id="lb-caption"></div>
+  </div>
+</div>
+
+<!-- BACK LINK -->
+<div style="text-align:center;padding:3rem 2rem;background:var(--sand);">
+  <a href="index.html" class="btn btn-fire">&larr; Back to main site</a>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div>
+        <div class="footer-brand">URO<span>_</span>PROJECT</div>
+        <div class="footer-tagline">28 stronghead linguists. &#8358;320k. One language.</div>
+      </div>
+      <ul class="footer-links">
+        <li><a href="index.html#story">Story</a></li>
+        <li><a href="index.html#resources">Resources</a></li>
+        <li><a href="team.html">Team</a></li>
+        <li><a href="gallery.html">Gallery</a></li>
+        <li><a href="index.html#contact">Contact</a></li>
+      </ul>
+    </div>
+    <hr class="footer-divider" />
+    <div class="footer-bottom">
+      <span>&copy; 2025 Uro Documentation Project.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Nav toggle
+const toggle = document.querySelector('.nav-toggle');
+const navLinks = document.querySelector('.nav-links');
+if (toggle) toggle.addEventListener('click', () => navLinks.classList.toggle('open'));
+
+// Static gallery — 59 field photos from Ajowa Akoko
+const GALLERY_DATA = [
+  {
+    "image": "https://drive.google.com/thumbnail?id=1IV2FuMl71Uy_vG2KES5AtgSCHhpgLlVO&sz=w800",
+    "caption": "Ifeoluwa thinks the field is for modeling😂"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=16cLTBxAlNWakmwQJonQ8wc_O7RaWmCjq&sz=w800",
+    "caption": "Deborah talking a selfie while on field?😒"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1bmJWni5qUc2A89wwVse-9pIbraX_3JfT&sz=w800",
+    "caption": "This was Deborah's idea 🚶"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=17ahSPy_jiZ_k_j-jNRz2wJ1Y0ftJREZY&sz=w800",
+    "caption": "Approaching a primary school in the Uro community"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1lc2bPqzc4kH_nzS7mtDC21ll5Dmf7F0R&sz=w800",
+    "caption": "Documenting how to make palmwine \"Imù\" from a seller."
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1NN83PCUMUEjdTso_FzkNpfvWfmk1KPmL&sz=w800",
+    "caption": "Ọrọ \"palm kernel\""
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1J_1PFJKJetqdshWbYwHtaK1l5ohfa9dQ&sz=w800",
+    "caption": "All good work deserves good food \"Ìveve\""
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1l5xJi-Ux_5zcOKcdLq-K-Skpid8sOyjL&sz=w800",
+    "caption": "Chief Joseph Oke Idowu joyously telling the story of Uro"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1NO8Xh0jTuwNKsBbyFF1oeJNvhGWC9MSK&sz=w800",
+    "caption": "Chief Samuel Salako Idowu and chief Joseph Oke Idowu during elicitation session"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1OYEI9eAqTm_uZ7Jgqf1-c_hBbEZTV_si&sz=w800",
+    "caption": "😊"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=101N70Sgtrc_mj3IpHyb1g0WL9I0g0sQD&sz=w800",
+    "caption": "An elicitation session"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1otsaUy5cAXPeQ3c4P5OK3JZh9VkAS3Mz&sz=w800",
+    "caption": "Akinloluwa scratching his nose instead of holding the recorder😓"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1CBmtA4lvrxiNoiMx9cWzg6ifsMsw1k8h&sz=w800",
+    "caption": "A beautiful view captured on our way back to the lodge.🌤"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1jq9v0t5R-jPRaFwuj3PWUlNidcrvQCc5&sz=w800",
+    "caption": "All work with no morning pictures make...😎"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1HM5Yo1qJOTsilA1gOdno_HvdoOM2NZay&sz=w800",
+    "caption": "Akinloluwa, Deborah and Ifeoluwa"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1qAZjkAtFvwGX8YaMqO0cNRFqNm9iTN48&sz=w800",
+    "caption": "Ifeoluwa and Deborah feeling themselves😊"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1eaO9dqDWCuTOozusPkwisG11c091tGS9&sz=w800",
+    "caption": "Akinloluwa and Deborah posing for the camera📸"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1Lz-tQja4TsFMbc33cbNaLe6m7FCpmGOM&sz=w800",
+    "caption": "See Deborah and Akinloluwa showing us their photogenic sides.📸"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1tHKjMkyxfDUFn0Yd7U-EBmhc1ZMvVU8I&sz=w800",
+    "caption": "Ifeoluwa and Akinloluwa shining their teeth for the camera.😁"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1El32Jt-_8x2_k_PHfVURQdp6ER7ns1IN&sz=w800",
+    "caption": ""
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1Cm5NFEg1MhlSdmRvR7rWaTYZh7BfyBch&sz=w800",
+    "caption": "The men in our field team. 😎"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1akHfULV_BDE2iCYGRjW4nRsmzlKyMpMi&sz=w800",
+    "caption": "🙌"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1p6Cm_XCIHXQeE8T4-ypnJNV-oXguzNaz&sz=w800",
+    "caption": "There was no one to take us a squad picture.😞 Deborah had to be behind the camera."
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1ESjWQLRX4txftQLaIUCo-w6sILY0UwFS&sz=w800",
+    "caption": "Cassava \"Ọ̀gbọ̀rọ̀dọ\" plantation"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1uYdJsIieXumKF2Pnx_MaX1JLyGWQOPVX&sz=w800",
+    "caption": "Cassava \"Ọ̀gbọ̀rọ̀dọ\""
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1SiQWO5zXHInYgZGLDzcTWsi8J7m3W5Tx&sz=w800",
+    "caption": "Peeled Ọ̀gbọ̀rọ̀dọ"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1O81B6ueKrkeeO2Kvz_oyLz06XlfdltJ7&sz=w800",
+    "caption": ""
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1dGSSw9ae463Dbf4izbLw03l6OulFlt8x&sz=w800",
+    "caption": ""
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1neT6Sz3gUpnw2X8JRQ_tfMe8epOQc836&sz=w800",
+    "caption": "Pot \"Àsa\" used for garri making"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1_dn1Yqak5SoriRofRWFGJBriePi4Q2r7&sz=w800",
+    "caption": "Akorede wondered what was inside this sack😂"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1WI9IPSuBvi_SHGNIlDge4gWPGwKE19ja&sz=w800",
+    "caption": "Water Pot \"Àsùji\""
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1D7JlVqfOWsAKhEqTLAlN9g-bERf-UNV-&sz=w800",
+    "caption": "Two Water Pots \"Àsùji íyọ́lọ́\""
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1DNzkWq-bzZJIAtZFq0kKSf2oTI3f93Hj&sz=w800",
+    "caption": "Breadfruit"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1sH4SWx8Qmtb7lMw4ccp84Lo0oTvR99Ct&sz=w800",
+    "caption": "Ifeoluwa has always been a farmer😂"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1eWpHTNrBoilOnoInu3cOTePe0RZnGnmT&sz=w800",
+    "caption": "Akinloluwa and Akorede while waiting for our language assistants😎"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1FF_F6Wg23yxbIo5HmKhcFFBYSKvsmy3A&sz=w800",
+    "caption": "Grinder stonee 'Ita ẹsẹyọ'"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=199McScQ_PSEGybqCkKu6UFUiHJdZPHnm&sz=w800",
+    "caption": "Grinded Cassava"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1KARy-I6JL0CPO_iB16c2N15wqAnHhxsU&sz=w800",
+    "caption": "Garri 😋"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1Xz6T9Uu8SAwS1Rtde7J2ygsHt7tdThOu&sz=w800",
+    "caption": "Documenting the garri making process in Uro"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1in75odvkbFjJCW86Nv_5TMpAEjH-Ux5o&sz=w800",
+    "caption": "Documenting the garri making process in Uro"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=13m-u8j4WKIZtNUC56EIZtJrlo8rzaPNP&sz=w800",
+    "caption": "inkún"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1keDcxdxhuTG0U9SinhgCDYBipnGxD4zE&sz=w800",
+    "caption": "Siever \"Ajọ̀\"... adapted from Yoruba"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1ehrej8k_ZmOKwckzWUzSupLRHqsFEMCU&sz=w800",
+    "caption": "Deborah and Ifeoluwa had an accident on the field and they documented the wounds as well😂"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=10EXFNhZ2Fi7wtMM5AIQadrbCB6eX7TuM&sz=w800",
+    "caption": "Uro Palace"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1DwotFUgcEA5UQc2PT-zaU4VmwwmP1r6i&sz=w800",
+    "caption": "Uro Palace"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1H0FnuYBeDpvYJhKIC6LniWuvcRd7JI3f&sz=w800",
+    "caption": "During a linguogram session"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1HZBtqGqp2m8GOIuwhromMeZlyqRS0gD9&sz=w800",
+    "caption": "We got a premuim access to the Edward Olaseni Polytechnic computer laboratory 😎😂"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1MEcJgBpNYJ68kvNCjco7w0EZTvJsrd4C&sz=w800",
+    "caption": "A picture with the student affairs officer of Edward Olaseni Polytechnic"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1xeHgrvhSLvw-nHFOOSmDXjlZ_psPfwsY&sz=w800",
+    "caption": "Akorede and Deborah swapped positions😂"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1ZaXJXMwwcFIaFwuf_uMEQA_55OobToIF&sz=w800",
+    "caption": "🧑‍🦯😂😎"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1k3EczetJZgZ8Ny08MOr3c0u_Fm0BzBeu&sz=w800",
+    "caption": "What is Deborah capturing?😂"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1EqKdNGAp-XydGbH7_cXwwmeOJi_Ve4cW&sz=w800",
+    "caption": "These street lamps were one of the happy things about going home late every night after documentation"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1MZsWi4AlwuTFMFeeinM7bt2ZRt-fy-o0&sz=w800",
+    "caption": "The Field Team with the King of Uro"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1lrEwojLZmTgnbn_O1DioZxtL4Q9G9y-a&sz=w800",
+    "caption": "Ifeoluwa and Deborah took their wounds to the palace😂😪"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1KEhB3_pWCVGokK1o5-5MmrsRXG_SOLup&sz=w800",
+    "caption": "Deborah with the King of Uro 😎"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1mXbcNyWkZ-1p6jLqszAb1L90C5tmwjsP&sz=w800",
+    "caption": "Ifeoluwa with the King of Uro 😎"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1_HIBcdkK5tOnhWKmhPXuliUghZrfDx-_&sz=w800",
+    "caption": "Akorede with the King of Uro 😎"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1jiYYrVeX-mBeErPn2uVpU8YXO63GB92W&sz=w800",
+    "caption": "Akinloluwa with the King of Uro 😎"
+  },
+  {
+    "image": "https://drive.google.com/thumbnail?id=1hQQx4QI2PYFUmgyVk6OwP1ZpOUjoYKdR&sz=w800",
+    "caption": "The king and chiefs of Uro compiled about 200 basic words in their language into this book."
+  }
+];
+
+let galleryItems = GALLERY_DATA;
+let currentIndex = 0;
+
+function loadGallery() {
+  const grid = document.getElementById('gallery-grid');
+  grid.innerHTML = galleryItems.map((item, i) => `
+    <div class="gallery-item" data-index="${i}">
+      <div class="gi-img-wrap">
+        <img src="${item.image}" alt="${item.caption || 'Field photo'}" loading="lazy"
+          onerror="this.parentNode.innerHTML='<div class=\'gi-broken\'>📷</div>'" />
+      </div>
+      ${item.caption ? `<div class="gi-caption">${item.caption}</div>` : ''}
+    </div>`).join('');
+
+  document.querySelectorAll('.gallery-item').forEach(el => {
+    el.addEventListener('click', () => openLightbox(parseInt(el.dataset.index)));
+  });
+}
+
+// Lightbox
+const lightbox = document.getElementById('lightbox');
+const lbImg = document.getElementById('lb-img');
+const lbCaption = document.getElementById('lb-caption');
+
+function openLightbox(index) {
+  currentIndex = index;
+  showLightboxItem();
+  lightbox.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox() {
+  lightbox.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function showLightboxItem() {
+  const item = galleryItems[currentIndex];
+  lbImg.src = item.image;
+  lbCaption.textContent = item.caption || '';
+}
+
+document.getElementById('lb-close').addEventListener('click', closeLightbox);
+document.getElementById('lb-prev').addEventListener('click', () => {
+  currentIndex = (currentIndex - 1 + galleryItems.length) % galleryItems.length;
+  showLightboxItem();
+});
+document.getElementById('lb-next').addEventListener('click', () => {
+  currentIndex = (currentIndex + 1) % galleryItems.length;
+  showLightboxItem();
+});
+lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
+document.addEventListener('keydown', (e) => {
+  if (!lightbox.classList.contains('open')) return;
+  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'ArrowLeft') { currentIndex = (currentIndex - 1 + galleryItems.length) % galleryItems.length; showLightboxItem(); }
+  if (e.key === 'ArrowRight') { currentIndex = (currentIndex + 1) % galleryItems.length; showLightboxItem(); }
+});
+
+loadGallery();
+</script>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📸</text></svg>" />
+</head>
+<body>
+
+<div class="ticker" aria-hidden="true">
+  <span class="ticker-inner">
+    FROM THE FIELD <span class="ticker-sep">✦</span>
+    AJOWA AKOKO, ONDO STATE <span class="ticker-sep">✦</span>
+    STRONGHEAD LINGUISTS ON LOCATION <span class="ticker-sep">✦</span>
+    URO DOCUMENTATION PROJECT <span class="ticker-sep">✦</span>
+    FROM THE FIELD <span class="ticker-sep">✦</span>
+    AJOWA AKOKO, ONDO STATE <span class="ticker-sep">✦</span>
+    STRONGHEAD LINGUISTS ON LOCATION <span class="ticker-sep">✦</span>
+    URO DOCUMENTATION PROJECT <span class="ticker-sep">✦</span>
+  </span>
+</div>
+
+<nav>
+  <a href="index.html" class="nav-brand">URO<span>_</span>PROJECT</a>
+  <button class="nav-toggle" aria-label="Toggle menu">&#9776;</button>
+  <ul class="nav-links">
+    <li><a href="index.html#story">Our Story</a></li>
+    <li><a href="index.html#resources">Resources</a></li>
+    <li><a href="index.html#language">Language</a></li>
+    <li><a href="team.html">Team</a></li>
+    <li><a href="gallery.html" style="color:var(--clay2);">Gallery</a></li>
+    <li><a href="index.html#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="gallery-hero">
+  <div class="gh-inner">
+    <div class="gh-label">From the Field</div>
+    <h1 class="gh-title">Not a formal<br><em>photo album.</em></h1>
+    <p class="gh-sub">
+      Real moments. Real people. Real fieldwork.<br>
+      Captions included &mdash; as chaotic as the trip itself.<br><br><span style="font-family:var(--mono);font-size:0.62rem;color:rgba(162,152,128,0.65);letter-spacing:0.1em;text-transform:uppercase;">Only 4 people were on the ground. All hands were on deck. We took pictures when we could.</span><br><br><span style="font-family:var(--mono);font-size:0.65rem;color:rgba(162,152,128,0.7);letter-spacing:0.1em;text-transform:uppercase;">Only 4 people were on the ground — all hands were on deck. We took pictures when we could.</span>
+    </p>
+  </div>
+</div>
+
+<!-- GALLERY GRID -->
+<div class="gallery-section">
+  <div class="gallery-grid" id="gallery-grid">
+    <div class="gallery-loading">
+      <div class="gl-spinner"></div>
+      <p>Loading photos&hellip;</p>
+    </div>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox">
+  <button class="lb-close" id="lb-close">&times;</button>
+  <button class="lb-prev" id="lb-prev">&#8592;</button>
+  <button class="lb-next" id="lb-next">&#8594;</button>
+  <div class="lb-inner">
+    <img src="" alt="" id="lb-img" />
+    <div class="lb-caption" id="lb-caption"></div>
+  </div>
+</div>
+
+<!-- BACK LINK -->
+<div style="text-align:center;padding:3rem 2rem;background:var(--sand);">
+  <a href="index.html" class="btn btn-fire">&larr; Back to main site</a>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div>
+        <div class="footer-brand">URO<span>_</span>PROJECT</div>
+        <div class="footer-tagline">28 stronghead linguists. &#8358;320k. One language.</div>
+      </div>
+      <ul class="footer-links">
+        <li><a href="index.html#story">Story</a></li>
+        <li><a href="index.html#resources">Resources</a></li>
+        <li><a href="team.html">Team</a></li>
+        <li><a href="gallery.html">Gallery</a></li>
+        <li><a href="index.html#contact">Contact</a></li>
+      </ul>
+    </div>
+    <hr class="footer-divider" />
+    <div class="footer-bottom">
+      <span>&copy; 2025 Uro Documentation Project.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Nav toggle
+const toggle = document.querySelector('.nav-toggle');
+const navLinks = document.querySelector('.nav-links');
+if (toggle) toggle.addEventListener('click', () => navLinks.classList.toggle('open'));
+
+// Load gallery from CMS content
+const GALLERY_FILES = [
+  'photo-1.json','photo-2.json','photo-3.json','photo-4.json','photo-5.json',
+  'photo-6.json','photo-7.json','photo-8.json','photo-9.json','photo-10.json',
+  'photo-11.json','photo-12.json','photo-13.json','photo-14.json','photo-15.json',
+  'photo-16.json','photo-17.json','photo-18.json','photo-19.json','photo-20.json',
+];
+
+let galleryItems = [];
+let currentIndex = 0;
+
+async function loadGallery() {
+  const grid = document.getElementById('gallery-grid');
+  const results = await Promise.all(
+    GALLERY_FILES.map(f => fetch('/content/gallery/' + f)
+      .then(r => r.ok ? r.json() : null)
+      .catch(() => null))
+  );
+
+  galleryItems = results
+    .filter(Boolean)
+    .filter(r => r.published !== false)
+    .sort((a,b) => (a.order||0)-(b.order||0));
+
+  if (!galleryItems.length) {
+    grid.innerHTML = `
+      <div class="gallery-empty">
+        <div style="font-size:3rem;margin-bottom:1rem;">📸</div>
+        <div style="font-family:var(--serif);font-size:1.5rem;color:var(--bark);margin-bottom:0.5rem;">Photos coming soon.</div>
+        <p style="color:var(--mist);font-size:0.88rem;">The team is still uploading field photos. Check back soon.</p>
+      </div>`;
+    return;
+  }
+
+  grid.innerHTML = galleryItems.map((item, i) => `
+    <div class="gallery-item" data-index="${i}">
+      <div class="gi-img-wrap">
+        <img src="${item.image}" alt="${item.caption || 'Field photo'}" loading="lazy"
+          onerror="this.parentNode.innerHTML='<div class=\\'gi-broken\\'>📷</div>'" />
+      </div>
+      <div class="gi-caption">${item.caption || ''}</div>
+    </div>`).join('');
+
+  document.querySelectorAll('.gallery-item').forEach(item => {
+    item.addEventListener('click', () => openLightbox(parseInt(item.dataset.index)));
+  });
+}
+
+// Lightbox
+const lightbox = document.getElementById('lightbox');
+const lbImg = document.getElementById('lb-img');
+const lbCaption = document.getElementById('lb-caption');
+
+function openLightbox(index) {
+  currentIndex = index;
+  showLightboxItem();
+  lightbox.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox() {
+  lightbox.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function showLightboxItem() {
+  const item = galleryItems[currentIndex];
+  lbImg.src = item.image;
+  lbCaption.textContent = item.caption || '';
+}
+
+document.getElementById('lb-close').addEventListener('click', closeLightbox);
+document.getElementById('lb-prev').addEventListener('click', () => {
+  currentIndex = (currentIndex - 1 + galleryItems.length) % galleryItems.length;
+  showLightboxItem();
+});
+document.getElementById('lb-next').addEventListener('click', () => {
+  currentIndex = (currentIndex + 1) % galleryItems.length;
+  showLightboxItem();
+});
+lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
+document.addEventListener('keydown', (e) => {
+  if (!lightbox.classList.contains('open')) return;
+  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'ArrowLeft') { currentIndex = (currentIndex - 1 + galleryItems.length) % galleryItems.length; showLightboxItem(); }
+  if (e.key === 'ArrowRight') { currentIndex = (currentIndex + 1) % galleryItems.length; showLightboxItem(); }
+});
+
+loadGallery();
+</script>
+</body>
+</html>

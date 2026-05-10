@@ -1,0 +1,146 @@
+backend:
+  name: git-gateway
+  branch: main
+
+media_folder: "uploads"
+public_folder: "/uploads"
+
+site_url: "https://uro-project.netlify.app"
+display_url: "https://uro-project.netlify.app"
+logo_url: ""
+
+locale: "en"
+
+collections:
+
+  # ── DICTIONARY ──────────────────────────────────
+  - name: "dictionary"
+    label: "📖 Dictionary"
+    label_singular: "Dictionary File"
+    folder: "content/resources/dictionary"
+    create: true
+    slug: "{{slug}}"
+    format: "json"
+    extension: "json"
+    fields:
+      - { label: "Title", name: "title", widget: "string", default: "Uro–English Dictionary" }
+      - { label: "Description", name: "description", widget: "text" }
+      - { label: "PDF File", name: "file", widget: "file", media_folder: "/uploads/resources", allow_multiple: false, media_library: { config: { multiple: false } } }
+      - { label: "Entry Count", name: "count", widget: "string", hint: "e.g. 1,200+", default: "1,200+" }
+      - { label: "Visible on site", name: "published", widget: "boolean", default: true }
+
+  # ── FLASHCARDS ──────────────────────────────────
+  - name: "flashcards"
+    label: "🗂️ Flashcard Sets"
+    label_singular: "Flashcard Set"
+    folder: "content/resources/flashcards"
+    create: true
+    slug: "{{slug}}"
+    format: "json"
+    extension: "json"
+    fields:
+      - { label: "Set Title", name: "title", widget: "string", hint: "e.g. Parts of the Body" }
+      - { label: "Description", name: "description", widget: "text" }
+      - { label: "PDF File", name: "file", widget: "file", media_folder: "/uploads/resources" }
+      - { label: "Published", name: "published", widget: "boolean", default: true }
+      - label: "Order"
+        name: "order"
+        widget: "number"
+        default: 1
+        hint: "Controls display order (1 = first)"
+
+  # ── STORIES ─────────────────────────────────────
+  - name: "stories"
+    label: "📚 Stories"
+    label_singular: "Story"
+    folder: "content/resources/stories"
+    create: true
+    slug: "{{slug}}"
+    format: "json"
+    extension: "json"
+    fields:
+      - { label: "Story Title", name: "title", widget: "string", hint: "e.g. The Tortoise and the Birds" }
+      - { label: "Short Description", name: "description", widget: "text" }
+      - { label: "PDF File", name: "file", widget: "file", media_folder: "/uploads/resources" }
+      - { label: "Published", name: "published", widget: "boolean", default: true }
+      - label: "Order"
+        name: "order"
+        widget: "number"
+        default: 1
+
+  # ── GAMES ───────────────────────────────────────
+  - name: "games"
+    label: "🎮 Games"
+    label_singular: "Game"
+    folder: "content/resources/games"
+    create: true
+    slug: "{{slug}}"
+    format: "json"
+    extension: "json"
+    fields:
+      - { label: "Game Title", name: "title", widget: "string" }
+      - { label: "Description", name: "description", widget: "text" }
+      - { label: "Play URL", name: "url", widget: "string", hint: "Link where players go to play the game" }
+      - { label: "Published", name: "published", widget: "boolean", default: true }
+
+  # ── RESEARCH / COMING SOON ──────────────────────
+  - name: "research"
+    label: "🔬 Research Papers"
+    label_singular: "Research Paper"
+    folder: "content/resources/research"
+    create: true
+    slug: "{{slug}}"
+    format: "json"
+    extension: "json"
+    fields:
+      - { label: "Title", name: "title", widget: "string" }
+      - { label: "Description", name: "description", widget: "text" }
+      - { label: "PDF File (leave empty if not ready)", name: "file", widget: "file", media_folder: "/uploads/resources", required: false }
+      - label: "Status"
+        name: "status"
+        widget: "select"
+        options:
+          - { label: "Coming Soon", value: "coming-soon" }
+          - { label: "Available", value: "available" }
+        default: "coming-soon"
+      - { label: "Published", name: "published", widget: "boolean", default: true }
+
+  # ── TEAM ────────────────────────────────────────
+  - name: "team"
+    label: "👥 Team Members"
+    label_singular: "Team Member"
+    folder: "content/team"
+    create: true
+    slug: "{{slug}}"
+    format: "json"
+    extension: "json"
+    fields:
+      - { label: "Full Name", name: "name", widget: "string" }
+      - label: "Role"
+        name: "role"
+        widget: "select"
+        options:
+          - { label: "Project Lead", value: "Project Lead" }
+          - { label: "Field Researcher", value: "Field Researcher" }
+          - { label: "No role (leave blank)", value: "" }
+        default: ""
+      - { label: "Photo", name: "photo", widget: "image", media_folder: "/uploads/team", required: false, hint: "Upload from your computer — any size, any shape. It will be cropped to a circle automatically." }
+      - { label: "Show on site", name: "published", widget: "boolean", default: true }
+
+  # ── GALLERY ─────────────────────────────────────
+  - name: "gallery"
+    label: "📸 Gallery"
+    label_singular: "Gallery Photo"
+    folder: "content/gallery"
+    create: true
+    slug: "{{slug}}"
+    format: "json"
+    extension: "json"
+    fields:
+      - { label: "Photo", name: "image", widget: "image", media_folder: "/uploads/gallery" }
+      - { label: "Caption", name: "caption", widget: "string", hint: "Keep it real e.g. 'It was Deborah's idea 😭😂'" }
+      - { label: "Published", name: "published", widget: "boolean", default: true }
+      - label: "Order"
+        name: "order"
+        widget: "number"
+        default: 1
